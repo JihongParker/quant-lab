@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Quant Lab — 최적화·시뮬레이션 모형 44선 | 박지홍</title>
+<meta name="description" content="엑셀과 VBA로 직접 구현한 경영 최적화 21종, 몬테카를로 시뮬레이션 23종. 선형계획부터 포트폴리오 최대예상손실액까지.">
+<style>
+:root{
+  --bg:#fbfbfa; --panel:#fff; --line:#e5e3df; --ink:#1c1b19; --mute:#6f6b65;
+  --accent:#8a5a2b; --accent-soft:#f3ece3; --tag:#f0efec; --shadow:0 1px 2px rgba(0,0,0,.04);
+}
+@media (prefers-color-scheme:dark){
+  :root{--bg:#121211;--panel:#1a1a18;--line:#2e2d2a;--ink:#eceae6;--mute:#9a958d;
+        --accent:#c99a63;--accent-soft:#26221d;--tag:#242320;--shadow:none;}
+}
+:root[data-theme="light"]{--bg:#fbfbfa;--panel:#fff;--line:#e5e3df;--ink:#1c1b19;--mute:#6f6b65;--accent:#8a5a2b;--accent-soft:#f3ece3;--tag:#f0efec;--shadow:0 1px 2px rgba(0,0,0,.04);}
+:root[data-theme="dark"]{--bg:#121211;--panel:#1a1a18;--line:#2e2d2a;--ink:#eceae6;--mute:#9a958d;--accent:#c99a63;--accent-soft:#26221d;--tag:#242320;--shadow:none;}
+
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"Pretendard","Apple SD Gothic Neo","Segoe UI",Roboto,sans-serif;
+  line-height:1.65;-webkit-font-smoothing:antialiased;}
+.wrap{max-width:980px;margin:0 auto;padding:0 20px}
+
+header{border-bottom:1px solid var(--line);padding:56px 0 34px;margin-bottom:34px}
+.eyebrow{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);font-weight:600;margin-bottom:14px}
+h1{font-size:clamp(28px,5vw,42px);line-height:1.2;margin:0 0 14px;letter-spacing:-.02em;font-weight:700}
+.lede{color:var(--mute);font-size:16px;max-width:62ch;margin:0 0 26px}
+.stats{display:flex;flex-wrap:wrap;gap:28px;padding-top:22px;border-top:1px solid var(--line)}
+.stat b{display:block;font-size:24px;font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+.stat span{font-size:12px;color:var(--mute)}
+
+.controls{position:sticky;top:0;z-index:10;background:var(--bg);
+  padding:14px 0;border-bottom:1px solid var(--line);margin-bottom:30px}
+.controls .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+#q{flex:1 1 240px;min-width:0;padding:9px 13px;border:1px solid var(--line);border-radius:7px;
+  background:var(--panel);color:var(--ink);font-size:14px;font-family:inherit}
+#q:focus{outline:2px solid var(--accent);outline-offset:-1px}
+.filters{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}
+.chip{border:1px solid var(--line);background:var(--panel);color:var(--mute);
+  padding:5px 11px;border-radius:999px;font-size:12.5px;cursor:pointer;font-family:inherit;
+  transition:.12s}
+.chip:hover{color:var(--ink);border-color:var(--accent)}
+.chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff}
+@media (prefers-color-scheme:dark){.chip[aria-pressed="true"]{color:#17150f}}
+:root[data-theme="dark"] .chip[aria-pressed="true"]{color:#17150f}
+
+section{margin-bottom:52px}
+.sec-head{display:flex;align-items:baseline;gap:12px;margin-bottom:6px}
+h2{font-size:21px;margin:0;letter-spacing:-.01em}
+.count{font-size:13px;color:var(--mute);font-variant-numeric:tabular-nums}
+.sec-desc{color:var(--mute);font-size:14px;margin:0 0 22px;max-width:66ch}
+
+.grid{display:grid;gap:12px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;
+  padding:18px 20px;box-shadow:var(--shadow)}
+.card-top{display:flex;gap:12px;align-items:baseline;margin-bottom:8px}
+.num{font-size:12px;color:var(--accent);font-weight:700;font-variant-numeric:tabular-nums;
+  min-width:26px;padding-top:2px}
+.card h3{margin:0;font-size:15.5px;font-weight:650;letter-spacing:-.005em}
+.card p{margin:0 0 11px 38px;color:var(--mute);font-size:14px}
+.tags{display:flex;gap:6px;flex-wrap:wrap;margin-left:38px}
+.tag{background:var(--tag);color:var(--mute);font-size:11.5px;padding:3px 9px;border-radius:5px;
+  border:1px solid transparent;white-space:nowrap}
+.tag.key{background:var(--accent-soft);color:var(--accent);font-weight:600}
+.hidden{display:none}
+.empty{color:var(--mute);font-size:14px;padding:30px 0;text-align:center}
+
+footer{border-top:1px solid var(--line);padding:30px 0 60px;margin-top:20px;
+  color:var(--mute);font-size:13.5px}
+footer a{color:var(--accent);text-decoration:none;border-bottom:1px solid transparent}
+footer a:hover{border-bottom-color:var(--accent)}
+.foot-links{display:flex;gap:20px;flex-wrap:wrap;margin-top:12px}
+.note{margin-top:18px;font-size:12.5px;line-height:1.7}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="eyebrow">Quantitative Modeling Portfolio</div>
+  <h1>최적화·시뮬레이션 모형 44선</h1>
+  <p class="lede">엑셀과 VBA로 직접 구현한 경영 최적화 모형 21종과 몬테카를로 시뮬레이션 모형 23종입니다.
+  선형계획과 비선형 해법, 진화 알고리즘부터 분포별 난수 생성, 기하브라운운동 주가 모형,
+  촐레스키 분해를 적용한 포트폴리오 최대예상손실액 산출까지 다룹니다.</p>
+  <div class="stats">
+    <div class="stat"><b>44</b><span>구현 모형</span></div>
+    <div class="stat"><b>21</b><span>최적화</span></div>
+    <div class="stat"><b>23</b><span>시뮬레이션</span></div>
+    <div class="stat"><b>1,000</b><span>최대 시행 횟수</span></div>
+  </div>
+</header>
+
+<div class="controls">
+  <div class="row">
+    <input id="q" type="search" placeholder="모형명이나 기법으로 검색 (예: VaR, 회귀, 옵션, 선형계획)" autocomplete="off">
+  </div>
+  <div class="filters" id="filters">
+    <button class="chip" aria-pressed="false" data-f="all">전체</button>
+    <button class="chip" aria-pressed="false" data-f="회귀">회귀분석</button>
+    <button class="chip" aria-pressed="false" data-f="선형계획">선형계획</button>
+    <button class="chip" aria-pressed="false" data-f="비선형">비선형·진화</button>
+    <button class="chip" aria-pressed="false" data-f="포트폴리오">포트폴리오</button>
+    <button class="chip" aria-pressed="false" data-f="위험">위험측정</button>
+    <button class="chip" aria-pressed="false" data-f="파생">파생상품</button>
+    <button class="chip" aria-pressed="false" data-f="분포">확률분포</button>
+    <button class="chip" aria-pressed="false" data-f="실데이터">실데이터</button>
+  </div>
+</div>
+
+<section id="opt">
+  <div class="sec-head"><h2>1. 경영 최적화</h2><span class="count">21종</span></div>
+  <p class="sec-desc">목적함수와 제약조건을 세우고 해를 구하는 문제입니다. 같은 문제를 선형계획과
+  비선형 해법, 진화 알고리즘으로 각각 풀어 해법별 특성을 비교했습니다.</p>
+  <div class="grid" id="grid-opt"></div>
+</section>
+
+<section id="sim">
+  <div class="sec-head"><h2>2. 몬테카를로 시뮬레이션</h2><span class="count">23종</span></div>
+  <p class="sec-desc">불확실성을 확률분포로 두고 반복 시행해 결과 분포를 얻는 문제입니다.
+  수요와 입찰가 같은 사업 변수에서 시작해 주가와 옵션, 헤지 포지션으로 확장했습니다.</p>
+  <div class="grid" id="grid-sim"></div>
+</section>
+
+<div class="empty hidden" id="empty">조건에 맞는 모형이 없습니다.</div>
+
+<footer>
+  <div><strong>박지홍</strong> · 부산대학교 경영학과</div>
+  <div class="foot-links">
+    <a href="https://ssrn.com/author=12066228" target="_blank" rel="noopener">SSRN 논문</a>
+    <a href="https://github.com/JihongParker/wti-fx-hedge-program" target="_blank" rel="noopener">헤지 모형 저장소</a>
+    <a href="https://jihongparker.github.io/hong-erp/" target="_blank" rel="noopener">ESG 의사결정 시스템</a>
+  </div>
+  <p class="note">모든 모형은 엑셀과 VBA로 직접 구현했습니다. 이 문서는 구현한 모형의 구조와
+  적용 기법을 정리한 목록이며, 원본 통합문서와 사용한 원자료는 포함하지 않습니다.</p>
+</footer>
+
+</div>
+
+<script>
+const OPT = [
+ ["단순회귀 원가추정","생산량과 총제조원가로 원가함수를 추정하고 잔차에 표준편차 2배 관리한계를 설정. 특정 생산량에서 원가가 기준선을 넘을 확률을 산출.",["회귀","실데이터"],["단순회귀","잔차분석","초과확률"]],
+ ["다중회귀 매출 예측","매출액을 국민총생산과 실업률, 이자율, 분기 더미로 회귀. 별도로 애플 일별 주가와 파마-프렌치 3요인 자료를 결합해 요인 회귀 수행.",["회귀","실데이터"],["다중회귀","더미변수","3요인모형"]],
+ ["멱함수 학습곡선 적합","80퍼센트 학습곡선을 멱함수로 적합해 누적평균원가를 추정. 평균절대비율오차와 평균절대오차, 평균잔차제곱으로 예측력을 평가.",["회귀"],["멱함수","학습곡선","MAPE·MAE·MSE"]],
+ ["민감도분석과 목표값 탐색","일변량과 이변량 데이터표로 순현재가치 교차점을 찾고, 목표값 찾기와 해찾기를 병행. 불확실성하 생산능력 계획의 기대이익까지 확장.",["비선형"],["데이터표","목표값찾기","기대이익"]],
+ ["선형계획 인력배치","개발·생산·판매·관리 네 부서의 인원을 배치해 총인건비를 최소화. 부문별 하한 제약 세 개를 동시에 만족시키는 해를 도출.",["선형계획"],["선형계획","제약최적화"]],
+ ["GRG 비선형 해법","비선형 목적함수를 일반축소기울기법으로 최소화. 초기값에 따라 국소해에 갇히는 현상을 확인.",["비선형"],["GRG","국소해"]],
+ ["유전 알고리즘 해법","같은 비선형 문제를 진화 알고리즘으로 재해결하고 일반축소기울기법 결과와 비교. 전역 탐색과 국소 탐색의 차이를 확인.",["비선형"],["유전알고리즘","전역탐색","해법비교"]],
+ ["수송문제","공급지 다섯 곳에서 수요지로 물량을 배분해 총 수송비를 최소화. 공급 능력과 수요량을 동시 제약으로 설정.",["선형계획"],["수송문제","네트워크"]],
+ ["제품배합 최적화 1","제품 다섯 종의 노동시간과 원재료 소비량 제약 아래 공헌이익을 최대화. 고정원가를 반영해 실제 이익 기준으로 판단.",["선형계획"],["제품배합","공헌이익"]],
+ ["제품배합 최적화 2","생산수량 구간에 따라 단위 공수와 변동원가가 바뀌는 조건부 구조. 불연속 목적함수라 진화 알고리즘으로 해결.",["비선형"],["구간별 단가","조건부 목적함수","진화알고리즘"]],
+ ["광고예산 배분","텔레비전과 잡지, 신문, 라디오, 직접우편 다섯 매체에 예산을 배분. 매체별 최소·최대 노출 횟수를 제약으로 설정.",["선형계획"],["예산배분","매체믹스"]],
+ ["디지털 광고 최적화","검색과 디스플레이, 동영상, 메일 네 채널의 전환 추적 자료를 사용. 전환당 비용을 기준으로 예산을 재배분해 투자수익률을 최대화.",["선형계획","실데이터"],["전환당비용","투자수익률","채널배분"]],
+ ["생산계획","작업센터 세 곳의 표준작업시간 제약 아래 제품 세 종의 생산수량을 결정.",["선형계획"],["생산계획","작업센터"]],
+ ["물류원가 최소화","발송지와 배송지를 격자로 두고 트럭 한 대당 운임을 기준으로 배차 조합을 최적화.",["선형계획"],["물류원가","배차"]],
+ ["복수 자본예산","분할투자와 미분할투자, 종속투자 세 조건에서 순현재가치 합을 최대화. 연차별 현금유출 한도를 제약으로 두고 채택 조합을 선택.",["선형계획"],["0-1 정수계획","순현재가치","투자조합"]],
+ ["최소분산 포트폴리오","자산별 평균수익률과 표준편차를 구하고 상관계수 행렬로 포트폴리오 분산을 계산. 분산을 최소화하는 투자비중을 도출.",["포트폴리오","위험"],["최소분산","상관행렬","분산최소화"]],
+ ["손실확률 추정","가중치 합이 1이 되도록 정규화한 포트폴리오를 1,000회 시행으로 모의. 수익률 분포에서 손실이 발생할 확률을 직접 산출.",["포트폴리오","위험"],["1,000회 시행","손실확률","분포추정"]],
+ ["샤프지수 최대화","위험조정 수익을 목적함수로 두고 진화 알고리즘으로 최적 투자비중을 탐색. 모집단 50, 난수 시드를 고정해 재현성을 확보.",["포트폴리오","비선형"],["샤프지수","진화알고리즘","재현성"]],
+ ["수익률곡선 적합","현물이자율에서 기간별 선도이자율을 도출하고 무차익 조건으로 검증. 곡선을 지수감쇠 함수형으로 두고 잔차제곱합 최소화로 모수를 추정.",["비선형","위험"],["선도이자율","곡선적합","최소제곱"]],
+ ["종이 재활용 배합","재생 수율 제약 아래 신문용지와 포장지, 인쇄용지의 원료 배합을 최적화해 비용을 최소화.",["선형계획"],["배합최적화","수율제약"]],
+ ["차익거래가격결정 모형","개별 종목과 지수의 1년 일별 종가로 요인 노출을 회귀 추정. 요인 수익률로 기대수익률을 설명.",["회귀","포트폴리오","실데이터"],["APT","요인노출","일별자료"]]
+];
+
+const SIM = [
+ ["다항분포 재고 의사결정","수요 분포에서 누적확률로 난수를 대응시켜 수요를 생성. 주문량 두 안을 각각 100회 시행해 평균이윤과 편차를 비교.",["분포"],["다항분포","역변환법","대안비교"]],
+ ["자동차 딜러 주문량 결정","난수를 고정한 판과 고정하지 않은 판을 따로 만들어 비교. 주문량별 평균이윤과 표준편차를 산출해 위험까지 반영한 의사결정을 도출.",["분포"],["난수고정","평균-표준편차","의사결정"]],
+ ["입찰 전략 시뮬레이션","경쟁사 네 곳의 입찰가를 균등분포로 생성해 낙찰 여부를 판정. 자사 입찰가 수준별 기대이윤을 비교해 최적 입찰가를 탐색.",["분포"],["균등분포","낙찰확률","기대이윤"]],
+ ["정규분포 재고 모형","수요를 정규분포 역함수로 생성해 재고 손익 구조를 모의. 다항분포 판과 결과를 대조.",["분포"],["정규분포","역함수","모형비교"]],
+ ["항공기 초과예약","탑승률과 미탑승률을 이항분포로 두고 좌석 대비 예약 수를 결정. 초과예약 비용과 공석 손실을 함께 반영.",["분포"],["이항분포","초과예약","기대손익"]],
+ ["프로젝트 수익성 분석","투자금액과 연차별 매출을 각각 분포로 두고 결합. 순현재가치의 분포와 평균, 표준편차, 첨도까지 요약통계로 정리.",["분포"],["순현재가치 분포","요약통계","위험분석 도구"]],
+ ["삼각분포 판매량 예측","최솟값과 최빈값, 최댓값만으로 삼각분포 역함수를 직접 구현. 판매량 분포에서 영업이익을 추정.",["분포"],["삼각분포","역함수 구현","영업이익"]],
+ ["고객만족과 시장점유율","브랜드 세 곳의 불만족 확률을 두고 52주간 브랜드 전환을 추적. 만족도 차이가 장기 점유율로 누적되는 구조를 확인.",["분포"],["전환행렬","장기균형","점유율"]],
+ ["경쟁업체 진입 현금흐름","고객 수와 연간 성장률, 초기 점유율을 각각 분포로 두고 결합. 경쟁 진입 시점별 현금흐름 변화를 모의.",["분포"],["복합분포","현금흐름","시나리오"]],
+ ["주가예측 기초모형","표준정규 역함수로 난수를 만들고 이산복리와 연속복리를 상호 변환. 랜덤워크에서 브라운운동, 기하브라운운동으로 확장해 100일 후 주가 분포와 최대예상손실액을 산출.",["위험","실데이터"],["기하브라운운동","브라운운동","최대예상손실액"]],
+ ["주가예측모형 개발","과거 일별 종가에서 수익률과 변동성을 추정한 뒤 1일과 1년 시계열을 예측. 예측 분포의 평균과 표준편차를 과거 자료와 대조해 모형을 검증.",["위험","실데이터"],["모수추정","예측검증","시계열"]],
+ ["포트폴리오 최대예상손실액","자산 세 종의 상관행렬을 촐레스키 분해해 무상관 난수를 상관 구조에 맞게 변환. 투자비중을 반영한 포트폴리오 손익 분포에서 최대예상손실액을 산출.",["위험","포트폴리오"],["촐레스키 분해","상관구조","VaR"]],
+ ["블랙숄즈 옵션가격","블랙숄즈 공식으로 산출한 값과 시뮬레이션으로 산출한 값을 비교. 두 결과가 수렴하는지로 모형 구현을 검증.",["파생"],["블랙숄즈","수렴검증","옵션가격"]],
+ ["옵션의 헤지 효과","유럽형 콜옵션과 풋옵션 가격을 각각 산출하고, 주식에 옵션을 결합한 포트폴리오의 수익 분포를 비교. 풋옵션을 이용한 포트폴리오 보험 전략까지 구성.",["파생"],["유럽형 옵션","포트폴리오 보험","손익분포"]],
+ ["나비형 스프레드","행사가격이 다른 옵션을 조합해 나비형 매입과 발행 양방향 손익구조를 구현. 기초자산 변동 구간별 손익을 비교.",["파생"],["스프레드 전략","손익구조","조합포지션"]],
+ ["이색옵션","경로 평균으로 결제되는 아시안옵션과, 장벽 도달 여부로 효력이 갈리는 녹인·녹아웃 옵션을 구현. 경로 의존성이 가격에 미치는 영향을 확인.",["파생"],["아시안옵션","녹인·녹아웃","경로의존"]],
+ ["환율선물","보유비용 모형으로 선도가격과 선물가격을 산출. 양국 금리 차이와 환율 변동성을 반영해 선물 포지션 손익을 모의.",["파생"],["보유비용모형","금리평형","선물가격"]],
+ ["상품선물 헤지","현물 가격과 선물 가격의 변동성 및 상관을 두고 헤지 포지션 손익을 모의. 난수를 고정한 판을 따로 두어 비교 가능성을 확보.",["파생","위험"],["교차헤지","변동성","난수고정"]],
+ ["환위험 옵션헤지","외화 표시 대금에 풋옵션을 매입해 환율 하락 위험을 방어. 내재변동성과 양국 금리를 반영해 헤지 비용 대비 효과를 평가.",["파생","위험"],["통화옵션","내재변동성","헤지비용"]],
+ ["델타헤지","콜옵션 포지션의 델타를 계산해 기초자산으로 상쇄. 주가 경로를 따라 델타를 재조정하며 헤지 오차가 누적되는 과정을 추적.",["파생","위험"],["델타","동적헤지","헤지오차"]],
+ ["델타헤지 실데이터 적용","실제 상장기업 주가를 기준일로 잡아 델타헤지를 적용. 교과 예제가 아닌 실제 변동성 환경에서 헤지 성과를 측정.",["파생","위험","실데이터"],["실데이터","기준일 설정","성과측정"]],
+ ["블랙숄즈 실데이터 적용","실제 상장기업 주가와 변동성으로 옵션 이론가를 산출. 입력 모수 변화에 따른 가격 민감도를 확인.",["파생","실데이터"],["실데이터","이론가","민감도"]],
+ ["원화 환위험 옵션헤지","원화 기준으로 통화옵션 헤지 구조를 재구성. 국내 금리 환경을 반영해 헤지 비용을 산출.",["파생","위험","실데이터"],["원화기준","통화옵션","헤지비용"]]
+];
+
+function card(item, i, prefix){
+  const [title, desc, groups, tags] = item;
+  const el = document.createElement("article");
+  el.className = "card";
+  el.dataset.search = (title + " " + desc + " " + tags.join(" ") + " " + groups.join(" ")).toLowerCase();
+  el.dataset.groups = groups.join(",");
+  el.innerHTML =
+    '<div class="card-top"><span class="num">' + prefix + String(i+1).padStart(2,"0") + '</span>' +
+    '<h3></h3></div>' +
+    '<p></p><div class="tags"></div>';
+  el.querySelector("h3").textContent = title;
+  el.querySelector("p").textContent = desc;
+  const tw = el.querySelector(".tags");
+  tags.forEach((t,ti) => {
+    const s = document.createElement("span");
+    s.className = "tag" + (ti === 0 ? " key" : "");
+    s.textContent = t;
+    tw.appendChild(s);
+  });
+  return el;
+}
+
+const gOpt = document.getElementById("grid-opt");
+const gSim = document.getElementById("grid-sim");
+OPT.forEach((m,i) => gOpt.appendChild(card(m,i,"O")));
+SIM.forEach((m,i) => gSim.appendChild(card(m,i,"S")));
+
+const cards = Array.from(document.querySelectorAll(".card"));
+const qEl = document.getElementById("q");
+const empty = document.getElementById("empty");
+let active = "all";
+
+function apply(){
+  const q = qEl.value.trim().toLowerCase();
+  let shown = 0;
+  cards.forEach(c => {
+    const okQ = !q || c.dataset.search.includes(q);
+    const okF = active === "all" || c.dataset.groups.split(",").includes(active);
+    const ok = okQ && okF;
+    c.classList.toggle("hidden", !ok);
+    if (ok) shown++;
+  });
+  document.querySelectorAll("section").forEach(s => {
+    const any = s.querySelectorAll(".card:not(.hidden)").length;
+    s.classList.toggle("hidden", any === 0);
+    const cnt = s.querySelector(".count");
+    if (cnt) cnt.textContent = any + "종";
+  });
+  empty.classList.toggle("hidden", shown > 0);
+}
+
+document.getElementById("filters").addEventListener("click", e => {
+  const b = e.target.closest(".chip");
+  if (!b) return;
+  active = b.dataset.f;
+  document.querySelectorAll(".chip").forEach(c =>
+    c.setAttribute("aria-pressed", String(c === b)));
+  apply();
+});
+qEl.addEventListener("input", apply);
+document.querySelector('.chip[data-f="all"]').setAttribute("aria-pressed","true");
+</script>
+</body>
+</html>

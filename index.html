@@ -4,93 +4,127 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Quant Lab — 최적화·시뮬레이션 모형 44선 | 박지홍</title>
-<meta name="description" content="엑셀과 VBA로 직접 구현한 경영 최적화 21종, 몬테카를로 시뮬레이션 23종. 각 모형의 실제 입력값과 계산 결과를 함께 싣습니다.">
+<meta name="description" content="엑셀과 VBA로 직접 구현한 경영 최적화 21종, 몬테카를로 시뮬레이션 23종. 각 모형의 절차와 입력값, 계산 결과, 해석을 함께 싣습니다.">
 <style>
 :root{
-  --bg:#fbfbfa; --panel:#fff; --line:#e5e3df; --ink:#1c1b19; --mute:#6f6b65;
-  --accent:#8a5a2b; --accent-soft:#f3ece3; --tag:#f0efec; --shadow:0 1px 2px rgba(0,0,0,.04);
-  --figbg:#faf9f7;
+  --bg:#f7f7f5; --panel:#fff; --text:#1a1a1a; --muted:#6b6b6b; --line:#e4e4e0;
+  --accent:#2b4c7e; --accent-soft:#e8eef6; --field:#faf9f7;
+
+  --dur-s:160ms; --dur-m:240ms;
+  --ease-out:cubic-bezier(.22,1,.36,1);
+
+  --shadow-raised:0 2px 4px rgb(0 0 0 / .05);
+  --shadow-float:0 10px 26px -14px rgb(20 26 34 / .35);
+
+  --fs-caption:11px; --fs-label:12.5px; --fs-body:14px;
+  --fs-lede:17px; --fs-h3:21px; --fs-h2:26px; --fs-stat:30px;
+
+  color-scheme:light dark;
 }
 @media (prefers-color-scheme:dark){
-  :root{--bg:#121211;--panel:#1a1a18;--line:#2e2d2a;--ink:#eceae6;--mute:#9a958d;
-        --accent:#c99a63;--accent-soft:#26221d;--tag:#242320;--shadow:none;--figbg:#161614;}
+  :root{--bg:#16161a;--panel:#1f1f24;--text:#ececec;--muted:#9a9aa2;--line:#2c2c33;
+        --accent:#7ba3d9;--accent-soft:#1e2733;--field:#1a1a1f;
+        --shadow-raised:0 2px 6px rgb(0 0 0 / .35);
+        --shadow-float:0 10px 28px -14px rgb(0 0 0 / .6);}
 }
-:root[data-theme="light"]{--bg:#fbfbfa;--panel:#fff;--line:#e5e3df;--ink:#1c1b19;--mute:#6f6b65;--accent:#8a5a2b;--accent-soft:#f3ece3;--tag:#f0efec;--shadow:0 1px 2px rgba(0,0,0,.04);--figbg:#faf9f7;}
-:root[data-theme="dark"]{--bg:#121211;--panel:#1a1a18;--line:#2e2d2a;--ink:#eceae6;--mute:#9a958d;--accent:#c99a63;--accent-soft:#26221d;--tag:#242320;--shadow:none;--figbg:#161614;}
+:root[data-theme="light"]{--bg:#f7f7f5;--panel:#fff;--text:#1a1a1a;--muted:#6b6b6b;--line:#e4e4e0;--accent:#2b4c7e;--accent-soft:#e8eef6;--field:#faf9f7;}
+:root[data-theme="dark"]{--bg:#16161a;--panel:#1f1f24;--text:#ececec;--muted:#9a9aa2;--line:#2c2c33;--accent:#7ba3d9;--accent-soft:#1e2733;--field:#1a1a1f;}
 
-*{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--ink);
-  font-family:-apple-system,BlinkMacSystemFont,"Pretendard","Apple SD Gothic Neo","Segoe UI",Roboto,sans-serif;
-  line-height:1.65;-webkit-font-smoothing:antialiased;}
-.wrap{max-width:1000px;margin:0 auto;padding:0 20px}
+*{box-sizing:border-box;margin:0}
+body{font-family:'Pretendard','Apple SD Gothic Neo',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  background:var(--bg);color:var(--text);line-height:1.6;word-break:keep-all;
+  -webkit-font-smoothing:antialiased;}
+p{text-wrap:pretty}
+.wrap{max-width:1020px;margin:0 auto;padding:0 22px}
 
-header{border-bottom:1px solid var(--line);padding:56px 0 34px;margin-bottom:30px}
-.eyebrow{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);font-weight:600;margin-bottom:14px}
-h1{font-size:clamp(28px,5vw,42px);line-height:1.2;margin:0 0 14px;letter-spacing:-.02em;font-weight:700}
-.lede{color:var(--mute);font-size:16px;max-width:64ch;margin:0 0 24px}
-.stats{display:flex;flex-wrap:wrap;gap:28px;padding-top:22px;border-top:1px solid var(--line)}
-.stat b{display:block;font-size:24px;font-variant-numeric:tabular-nums;letter-spacing:-.01em}
-.stat span{font-size:12px;color:var(--mute)}
+header{padding:60px 0 32px;border-bottom:1px solid var(--line);margin-bottom:0}
+.eyebrow{font-size:var(--fs-caption);letter-spacing:.14em;text-transform:uppercase;
+  color:var(--accent);font-weight:700;margin-bottom:14px}
+h1{font-size:clamp(28px,5vw,42px);line-height:1.18;letter-spacing:-.022em;font-weight:800;margin-bottom:14px}
+.lede{color:var(--muted);font-size:var(--fs-lede);max-width:62ch;margin-bottom:28px}
+.stats{display:flex;flex-wrap:wrap;gap:36px;padding-top:24px;border-top:1px solid var(--line)}
+.stat b{display:block;font-size:var(--fs-stat);font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:-.02em;line-height:1.2}
+.stat span{font-size:var(--fs-label);color:var(--muted)}
 
-.controls{position:sticky;top:0;z-index:10;background:var(--bg);
-  padding:14px 0;border-bottom:1px solid var(--line);margin-bottom:28px}
-#q{width:100%;padding:9px 13px;border:1px solid var(--line);border-radius:7px;
-  background:var(--panel);color:var(--ink);font-size:14px;font-family:inherit}
-#q:focus{outline:2px solid var(--accent);outline-offset:-1px}
-.filters{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}
-.chip{border:1px solid var(--line);background:var(--panel);color:var(--mute);
-  padding:5px 11px;border-radius:999px;font-size:12.5px;cursor:pointer;font-family:inherit;transition:.12s}
-.chip:hover{color:var(--ink);border-color:var(--accent)}
+.controls{position:sticky;top:0;z-index:20;background:var(--bg);
+  padding:16px 0 14px;border-bottom:1px solid var(--line);margin-bottom:34px}
+#q{width:100%;padding:10px 14px;border:1px solid var(--line);border-radius:9px;
+  background:var(--panel);color:var(--text);font:inherit;font-size:var(--fs-body);
+  transition:border-color var(--dur-s) var(--ease-out)}
+#q:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.filters{display:flex;gap:7px;flex-wrap:wrap;margin-top:11px;align-items:center}
+.chip{border:1px solid var(--line);background:var(--panel);color:var(--muted);
+  padding:5px 12px;border-radius:999px;font:inherit;font-size:var(--fs-label);
+  cursor:pointer;transition:all var(--dur-s) var(--ease-out)}
+.chip:hover{color:var(--text);border-color:var(--accent)}
 .chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff}
-@media (prefers-color-scheme:dark){.chip[aria-pressed="true"]{color:#17150f}}
-:root[data-theme="dark"] .chip[aria-pressed="true"]{color:#17150f}
-.hint{font-size:12.5px;color:var(--mute);margin-top:9px}
+@media (prefers-color-scheme:dark){.chip[aria-pressed="true"]{color:#12161c}}
+:root[data-theme="dark"] .chip[aria-pressed="true"]{color:#12161c}
+.spacer{flex:1}
+.ghost{border-color:transparent;background:transparent}
 
-section{margin-bottom:50px}
-.sec-head{display:flex;align-items:baseline;gap:12px;margin-bottom:6px}
-h2{font-size:21px;margin:0;letter-spacing:-.01em}
-.count{font-size:13px;color:var(--mute);font-variant-numeric:tabular-nums}
-.sec-desc{color:var(--mute);font-size:14px;margin:0 0 20px;max-width:68ch}
+section{margin-bottom:56px}
+.sec-head{display:flex;align-items:baseline;gap:12px;margin-bottom:18px}
+h2{font-size:var(--fs-h2);letter-spacing:-.02em;font-weight:750}
+.count{font-size:var(--fs-label);color:var(--muted);font-variant-numeric:tabular-nums}
 
-.grid{display:grid;gap:11px}
-details.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;
-  box-shadow:var(--shadow);overflow:hidden}
-details.card[open]{border-color:var(--accent)}
-summary{list-style:none;cursor:pointer;padding:17px 20px;display:block}
+.grid{display:grid;gap:12px}
+details.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;
+  box-shadow:var(--shadow-raised);overflow:hidden;
+  transition:box-shadow var(--dur-m) var(--ease-out),border-color var(--dur-m) var(--ease-out)}
+details.card:hover{box-shadow:var(--shadow-float)}
+details.card[open]{border-color:var(--accent);box-shadow:var(--shadow-float)}
+summary{list-style:none;cursor:pointer;padding:18px 22px;display:block}
 summary::-webkit-details-marker{display:none}
-summary:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
-.card-top{display:flex;gap:12px;align-items:baseline}
-.num{font-size:12px;color:var(--accent);font-weight:700;font-variant-numeric:tabular-nums;min-width:30px}
-.card h3{margin:0;font-size:15.5px;font-weight:650;letter-spacing:-.005em;flex:1}
-.chev{color:var(--mute);font-size:12px;flex-shrink:0;transition:transform .15s}
+summary:focus-visible{outline:2px solid var(--accent);outline-offset:-3px}
+.card-top{display:flex;gap:13px;align-items:baseline}
+.num{font-size:var(--fs-caption);color:var(--accent);font-weight:800;
+  font-variant-numeric:tabular-nums;letter-spacing:.04em;min-width:30px;flex-shrink:0}
+.card h3{font-size:var(--fs-h3);font-weight:700;letter-spacing:-.015em;flex:1;line-height:1.35}
+.chev{color:var(--muted);font-size:var(--fs-label);flex-shrink:0;
+  transition:transform var(--dur-m) var(--ease-out)}
 details[open] .chev{transform:rotate(180deg)}
-.desc{margin:8px 0 11px 42px;color:var(--mute);font-size:14px}
-.tags{display:flex;gap:6px;flex-wrap:wrap;margin-left:42px}
-.tag{background:var(--tag);color:var(--mute);font-size:11.5px;padding:3px 9px;border-radius:5px;white-space:nowrap}
-.tag.key{background:var(--accent-soft);color:var(--accent);font-weight:600}
+.desc{margin:9px 0 12px 43px;color:var(--muted);font-size:var(--fs-body)}
+.tags{display:flex;gap:6px;flex-wrap:wrap;margin-left:43px}
+.tag{background:var(--field);border:1px solid var(--line);color:var(--muted);
+  font-size:var(--fs-caption);padding:3px 9px;border-radius:6px;white-space:nowrap}
+.tag.key{background:var(--accent-soft);border-color:transparent;color:var(--accent);font-weight:700}
 
-.figs{border-top:1px solid var(--line);background:var(--figbg);padding:15px 20px 17px}
-.figs-title{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);
-  font-weight:600;margin-bottom:11px}
-.figtable{width:100%;border-collapse:collapse;font-size:13.5px}
-.figtable tr{border-bottom:1px solid var(--line)}
-.figtable tr:last-child{border-bottom:none}
-.figtable td{padding:6px 0}
-.figtable td:first-child{color:var(--mute);padding-right:16px}
-.figtable td:last-child{text-align:right;font-variant-numeric:tabular-nums;font-weight:600;white-space:nowrap}
-@media (max-width:520px){
-  .figtable td:last-child{white-space:normal}
-  .desc,.tags{margin-left:0}
-}
+.body{border-top:1px solid var(--line);background:var(--field);padding:20px 22px 22px}
+.block{margin-bottom:20px}
+.block:last-child{margin-bottom:0}
+.blabel{font-size:var(--fs-caption);letter-spacing:.1em;text-transform:uppercase;
+  color:var(--accent);font-weight:700;margin-bottom:10px}
+ol.steps{margin:0;padding-left:0;list-style:none;counter-reset:s}
+ol.steps li{counter-increment:s;position:relative;padding-left:30px;margin-bottom:8px;
+  font-size:var(--fs-body);color:var(--text)}
+ol.steps li:last-child{margin-bottom:0}
+ol.steps li::before{content:counter(s);position:absolute;left:0;top:1px;
+  width:20px;height:20px;border-radius:50%;background:var(--accent-soft);color:var(--accent);
+  font-size:var(--fs-caption);font-weight:700;display:grid;place-items:center}
+
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+@media (max-width:640px){.cols{grid-template-columns:1fr;gap:20px}}
+table.kv{width:100%;border-collapse:collapse;font-size:13.5px}
+table.kv tr{border-bottom:1px solid var(--line)}
+table.kv tr:last-child{border-bottom:none}
+table.kv td{padding:6px 0;vertical-align:top}
+table.kv td:first-child{color:var(--muted);padding-right:14px}
+table.kv td:last-child{text-align:right;font-variant-numeric:tabular-nums;font-weight:650}
+.out td:last-child{color:var(--accent)}
+
+.read{background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--accent);
+  border-radius:8px;padding:13px 16px;font-size:var(--fs-body);color:var(--text)}
 
 .hidden{display:none}
-.empty{color:var(--mute);font-size:14px;padding:30px 0;text-align:center}
+.empty{color:var(--muted);font-size:var(--fs-body);padding:34px 0;text-align:center}
 
-footer{border-top:1px solid var(--line);padding:30px 0 60px;margin-top:20px;color:var(--mute);font-size:13.5px}
-footer a{color:var(--accent);text-decoration:none;border-bottom:1px solid transparent}
+footer{border-top:1px solid var(--line);padding:32px 0 64px;color:var(--muted);font-size:13.5px}
+footer a{color:var(--accent);text-decoration:none;border-bottom:1px solid transparent;
+  transition:border-color var(--dur-s) var(--ease-out)}
 footer a:hover{border-bottom-color:var(--accent)}
-.foot-links{display:flex;gap:20px;flex-wrap:wrap;margin-top:12px}
-.note{margin-top:18px;font-size:12.5px;line-height:1.7;max-width:70ch}
+.foot-links{display:flex;gap:22px;flex-wrap:wrap;margin-top:12px}
+.note{margin-top:20px;font-size:var(--fs-label);line-height:1.75;max-width:72ch}
 </style>
 </head>
 <body>
@@ -100,12 +134,11 @@ footer a:hover{border-bottom-color:var(--accent)}
   <div class="eyebrow">Quantitative Modeling Portfolio</div>
   <h1>최적화·시뮬레이션 모형 44선</h1>
   <p class="lede">엑셀과 VBA로 직접 구현한 경영 최적화 모형 21종과 몬테카를로 시뮬레이션 모형 23종입니다.
-  각 항목을 열면 실제로 사용한 입력값과 계산 결과가 나옵니다. 모두 구현한 통합문서에서 그대로 옮긴 숫자입니다.</p>
+  항목을 열면 어떤 절차로 풀었는지, 무엇을 넣어 무엇이 나왔는지, 그 숫자를 어떻게 읽었는지가 함께 나옵니다.</p>
   <div class="stats">
     <div class="stat"><b>44</b><span>구현 모형</span></div>
     <div class="stat"><b>21</b><span>최적화</span></div>
     <div class="stat"><b>23</b><span>시뮬레이션</span></div>
-    <div class="stat"><b>380</b><span>수록 계산값</span></div>
   </div>
 </header>
 
@@ -121,21 +154,18 @@ footer a:hover{border-bottom-color:var(--accent)}
     <button class="chip" aria-pressed="false" data-f="파생">파생상품</button>
     <button class="chip" aria-pressed="false" data-f="분포">확률분포</button>
     <button class="chip" aria-pressed="false" data-f="실데이터">실데이터</button>
+    <span class="spacer"></span>
+    <button class="chip ghost" id="toggleAll">전부 펼치기</button>
   </div>
-  <div class="hint">항목을 누르면 입력값과 계산 결과가 펼쳐집니다. <button id="toggleAll" class="chip" style="margin-left:4px">전부 펼치기</button></div>
 </div>
 
 <section id="opt">
-  <div class="sec-head"><h2>1. 경영 최적화</h2><span class="count">21종</span></div>
-  <p class="sec-desc">목적함수와 제약조건을 세우고 해를 구하는 문제입니다. 같은 문제를 선형계획과
-  비선형 해법, 진화 알고리즘으로 각각 풀어 해법별 특성을 비교했습니다.</p>
+  <div class="sec-head"><h2>1. 최적화</h2><span class="count">21종</span></div>
   <div class="grid" id="grid-opt"></div>
 </section>
 
 <section id="sim">
-  <div class="sec-head"><h2>2. 몬테카를로 시뮬레이션</h2><span class="count">23종</span></div>
-  <p class="sec-desc">불확실성을 확률분포로 두고 반복 시행해 결과 분포를 얻는 문제입니다.
-  수요와 입찰가 같은 사업 변수에서 시작해 주가와 옵션, 헤지 포지션으로 확장했습니다.</p>
+  <div class="sec-head"><h2>2. 시뮬레이션</h2><span class="count">23종</span></div>
   <div class="grid" id="grid-sim"></div>
 </section>
 
@@ -151,55 +181,64 @@ footer a:hover{border-bottom-color:var(--accent)}
   </div>
   <p class="note">모든 모형은 엑셀과 VBA로 직접 구현했습니다. 표에 실린 값은 구현한 통합문서의 계산 결과를
   그대로 옮긴 것입니다. 난수를 쓰는 모형은 표시된 시행 조건에서 얻은 값이므로 다시 돌리면 달라질 수 있으며,
-  난수를 고정한 모형은 그 사실을 항목에 적었습니다. 원본 통합문서와 사용한 원자료는 포함하지 않습니다.</p>
+  난수를 고정한 모형은 그 사실을 항목 안에 적었습니다. 원본 통합문서와 사용한 원자료는 포함하지 않습니다.</p>
 </footer>
 
 </div>
 
 <script src="data.js"></script>
 <script>
-function build(item, i, prefix){
-  const [title, desc, groups, tags, figs] = item;
-  const el = document.createElement("details");
-  el.className = "card";
-  el.dataset.search = (title+" "+desc+" "+tags.join(" ")+" "+groups.join(" ")+" "+
-    figs.map(f=>f[0]+" "+f[1]).join(" ")).toLowerCase();
-  el.dataset.groups = groups.join(",");
+const el=(t,c,x)=>{const e=document.createElement(t);if(c)e.className=c;if(x!=null)e.textContent=x;return e};
 
-  const sum = document.createElement("summary");
-  const top = document.createElement("div");
-  top.className = "card-top";
-  const n = document.createElement("span"); n.className="num";
-  n.textContent = prefix + String(i+1).padStart(2,"0");
-  const h = document.createElement("h3"); h.textContent = title;
-  const ch = document.createElement("span"); ch.className="chev"; ch.textContent="▾";
-  top.append(n,h,ch);
-  const p = document.createElement("p"); p.className="desc"; p.textContent = desc;
-  const tw = document.createElement("div"); tw.className="tags";
-  tags.forEach((t,ti)=>{ const s=document.createElement("span");
-    s.className="tag"+(ti===0?" key":""); s.textContent=t; tw.appendChild(s); });
-  sum.append(top,p,tw);
+function kvTable(rows,cls){
+  const t=el("table","kv"+(cls?" "+cls:""));
+  rows.forEach(([k,v])=>{const tr=el("tr");tr.append(el("td",null,k),el("td",null,v));t.appendChild(tr)});
+  return t;
+}
 
-  const box = document.createElement("div"); box.className="figs";
-  const bt = document.createElement("div"); bt.className="figs-title";
-  bt.textContent = "입력값과 계산 결과";
-  const tbl = document.createElement("table"); tbl.className="figtable";
-  figs.forEach(([k,v])=>{
-    const tr=document.createElement("tr");
-    const td1=document.createElement("td"); td1.textContent=k;
-    const td2=document.createElement("td"); td2.textContent=v;
-    tr.append(td1,td2); tbl.appendChild(tr);
-  });
-  box.append(bt,tbl);
-  el.append(sum,box);
-  return el;
+function build(item,i,prefix){
+  const [title,desc,groups,tags,d]=item;
+  const card=el("details","card");
+  card.dataset.groups=groups.join(",");
+  card.dataset.search=[title,desc,tags.join(" "),groups.join(" "),d.steps.join(" "),
+    d.in.map(r=>r.join(" ")).join(" "),d.out.map(r=>r.join(" ")).join(" "),d.read]
+    .join(" ").toLowerCase();
+
+  const sum=el("summary");
+  const top=el("div","card-top");
+  top.append(el("span","num",prefix+String(i+1).padStart(2,"0")),
+             el("h3",null,title), el("span","chev","▾"));
+  sum.append(top, el("p","desc",desc));
+  const tw=el("div","tags");
+  tags.forEach((t,ti)=>tw.appendChild(el("span","tag"+(ti===0?" key":""),t)));
+  sum.appendChild(tw);
+
+  const body=el("div","body");
+
+  const b1=el("div","block");
+  b1.appendChild(el("div","blabel","풀이 절차"));
+  const ol=el("ol","steps");
+  d.steps.forEach(s=>ol.appendChild(el("li",null,s)));
+  b1.appendChild(ol);
+
+  const b2=el("div","block cols");
+  const c1=el("div"); c1.append(el("div","blabel","입력값"), kvTable(d.in));
+  const c2=el("div"); c2.append(el("div","blabel","계산 결과"), kvTable(d.out,"out"));
+  b2.append(c1,c2);
+
+  const b3=el("div","block");
+  b3.append(el("div","blabel","결과 해석"), el("div","read",d.read));
+
+  body.append(b1,b2,b3);
+  card.append(sum,body);
+  return card;
 }
 
 const gOpt=document.getElementById("grid-opt"), gSim=document.getElementById("grid-sim");
 OPT.forEach((m,i)=>gOpt.appendChild(build(m,i,"O")));
 SIM.forEach((m,i)=>gSim.appendChild(build(m,i,"S")));
 
-const cards=Array.from(document.querySelectorAll("details.card"));
+const cards=[...document.querySelectorAll("details.card")];
 const qEl=document.getElementById("q"), empty=document.getElementById("empty");
 let active="all";
 
@@ -207,24 +246,23 @@ function apply(){
   const q=qEl.value.trim().toLowerCase();
   let shown=0;
   cards.forEach(c=>{
-    const okQ=!q||c.dataset.search.includes(q);
-    const okF=active==="all"||c.dataset.groups.split(",").includes(active);
-    const ok=okQ&&okF;
+    const ok=(!q||c.dataset.search.includes(q)) &&
+             (active==="all"||c.dataset.groups.split(",").includes(active));
     c.classList.toggle("hidden",!ok);
     if(ok){shown++; if(q) c.open=true;}
   });
   document.querySelectorAll("section").forEach(s=>{
-    const any=s.querySelectorAll("details.card:not(.hidden)").length;
-    s.classList.toggle("hidden",any===0);
-    const cnt=s.querySelector(".count"); if(cnt) cnt.textContent=any+"종";
+    const n=s.querySelectorAll("details.card:not(.hidden)").length;
+    s.classList.toggle("hidden",n===0);
+    const c=s.querySelector(".count"); if(c) c.textContent=n+"종";
   });
   empty.classList.toggle("hidden",shown>0);
 }
 
 document.getElementById("filters").addEventListener("click",e=>{
-  const b=e.target.closest(".chip"); if(!b) return;
+  const b=e.target.closest(".chip"); if(!b||b.id==="toggleAll") return;
   active=b.dataset.f;
-  document.querySelectorAll("#filters .chip").forEach(c=>
+  document.querySelectorAll("#filters .chip[data-f]").forEach(c=>
     c.setAttribute("aria-pressed",String(c===b)));
   apply();
 });
@@ -232,14 +270,10 @@ qEl.addEventListener("input",apply);
 
 const tg=document.getElementById("toggleAll");
 tg.addEventListener("click",()=>{
-  const anyClosed=cards.some(c=>!c.classList.contains("hidden")&&!c.open);
-  cards.forEach(c=>{ if(!c.classList.contains("hidden")) c.open=anyClosed; });
-  tg.textContent=anyClosed?"전부 접기":"전부 펼치기";
+  const open=cards.some(c=>!c.classList.contains("hidden")&&!c.open);
+  cards.forEach(c=>{if(!c.classList.contains("hidden")) c.open=open});
+  tg.textContent=open?"전부 접기":"전부 펼치기";
 });
-
-// 수록 계산값 개수를 실제 값으로 표시
-document.querySelectorAll(".stat b")[3].textContent =
-  OPT.concat(SIM).reduce((a,m)=>a+m[4].length,0);
 </script>
 </body>
 </html>

@@ -4,11 +4,15 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Quant Lab — 최적화·시뮬레이션 모형 44선 | 박지홍</title>
-<meta name="description" content="엑셀과 VBA로 직접 구현한 경영 최적화 21종, 몬테카를로 시뮬레이션 23종. 각 모형의 절차와 입력값, 계산 결과, 해석을 함께 싣습니다.">
+<meta name="description" content="엑셀과 VBA로 직접 구현한 경영 최적화 21종, 몬테카를로 시뮬레이션 23종. 모든 모형을 브라우저에서 직접 돌려보는 동적 패널과 원본 통합문서 발췌를 함께 싣습니다.">
 <style>
 :root{
   --bg:#f7f7f5; --panel:#fff; --text:#1a1a1a; --muted:#6b6b6b; --line:#e4e4e0;
   --accent:#2b4c7e; --accent-soft:#e8eef6; --field:#faf9f7;
+
+  --ch-s1:#2a78d6; --ch-s2:#eb6834; --ch-s3:#1baf7a;
+  --ch-red:#e34948; --ch-good:#0ca30c; --ch-crit:#d03b3b;
+  --ch-mut:#898781; --ch-grid:#e1e0d9; --ch-base:#c3c2b7;
 
   --dur-s:160ms; --dur-m:240ms;
   --ease-out:cubic-bezier(.22,1,.36,1);
@@ -24,11 +28,15 @@
 @media (prefers-color-scheme:dark){
   :root{--bg:#16161a;--panel:#1f1f24;--text:#ececec;--muted:#9a9aa2;--line:#2c2c33;
         --accent:#7ba3d9;--accent-soft:#1e2733;--field:#1a1a1f;
+        --ch-s1:#3987e5;--ch-s2:#d95926;--ch-s3:#199e70;--ch-red:#e66767;
+        --ch-grid:#2c2c2a;--ch-base:#383835;
         --shadow-raised:0 2px 6px rgb(0 0 0 / .35);
         --shadow-float:0 10px 28px -14px rgb(0 0 0 / .6);}
 }
-:root[data-theme="light"]{--bg:#f7f7f5;--panel:#fff;--text:#1a1a1a;--muted:#6b6b6b;--line:#e4e4e0;--accent:#2b4c7e;--accent-soft:#e8eef6;--field:#faf9f7;}
-:root[data-theme="dark"]{--bg:#16161a;--panel:#1f1f24;--text:#ececec;--muted:#9a9aa2;--line:#2c2c33;--accent:#7ba3d9;--accent-soft:#1e2733;--field:#1a1a1f;}
+:root[data-theme="light"]{--bg:#f7f7f5;--panel:#fff;--text:#1a1a1a;--muted:#6b6b6b;--line:#e4e4e0;--accent:#2b4c7e;--accent-soft:#e8eef6;--field:#faf9f7;
+  --ch-s1:#2a78d6;--ch-s2:#eb6834;--ch-s3:#1baf7a;--ch-red:#e34948;--ch-grid:#e1e0d9;--ch-base:#c3c2b7;}
+:root[data-theme="dark"]{--bg:#16161a;--panel:#1f1f24;--text:#ececec;--muted:#9a9aa2;--line:#2c2c33;--accent:#7ba3d9;--accent-soft:#1e2733;--field:#1a1a1f;
+  --ch-s1:#3987e5;--ch-s2:#d95926;--ch-s3:#199e70;--ch-red:#e66767;--ch-grid:#2c2c2a;--ch-base:#383835;}
 
 *{box-sizing:border-box;margin:0}
 body{font-family:'Pretendard','Apple SD Gothic Neo',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
@@ -37,7 +45,9 @@ body{font-family:'Pretendard','Apple SD Gothic Neo',-apple-system,BlinkMacSystem
 p{text-wrap:pretty}
 .wrap{max-width:1020px;margin:0 auto;padding:0 22px}
 
-header{padding:60px 0 32px;border-bottom:1px solid var(--line);margin-bottom:0}
+header{padding:60px 0 32px;border-bottom:1px solid var(--line);margin-bottom:0;position:relative;overflow:hidden}
+#hero{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+header>.wrap-inner{position:relative}
 .eyebrow{font-size:var(--fs-caption);letter-spacing:.14em;text-transform:uppercase;
   color:var(--accent);font-weight:700;margin-bottom:14px}
 h1{font-size:clamp(28px,5vw,42px);line-height:1.18;letter-spacing:-.022em;font-weight:800;margin-bottom:14px}
@@ -116,6 +126,80 @@ table.kv td:last-child{text-align:right;font-variant-numeric:tabular-nums;font-w
 .read{background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--accent);
   border-radius:8px;padding:13px 16px;font-size:var(--fs-body);color:var(--text)}
 
+/* ---------- 캐러셀 ---------- */
+.caro{margin-bottom:22px;background:var(--panel);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.caro-head{display:flex;align-items:center;gap:10px;padding:10px 12px;border-bottom:1px solid var(--line)}
+.caro-title{font-size:var(--fs-label);font-weight:700;flex:1;color:var(--text)}
+.caro-btn{border:1px solid var(--line);background:var(--panel);color:var(--text);
+  width:28px;height:28px;border-radius:8px;cursor:pointer;font-size:14px;line-height:1;
+  transition:all var(--dur-s) var(--ease-out)}
+.caro-btn:hover{border-color:var(--accent);color:var(--accent)}
+.caro-btn:disabled{opacity:.35;cursor:default}
+.caro-dots{display:flex;gap:5px;align-items:center}
+.caro-dots i{width:7px;height:7px;border-radius:50%;background:var(--line);transition:background var(--dur-s)}
+.caro-dots i.on{background:var(--accent)}
+.caro-track{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none}
+.caro-track::-webkit-scrollbar{display:none}
+.slide{flex:0 0 100%;scroll-snap-align:start;min-width:0;padding:14px 14px 16px}
+
+/* ---------- 동적 패널 ---------- */
+canvas.ch{width:100%;display:block;margin:10px 0 4px}
+.ctl-row{display:flex;gap:14px;flex-wrap:wrap;align-items:center;margin:2px 0 6px}
+.ctl{display:flex;align-items:center;gap:8px;font-size:var(--fs-label);color:var(--muted);min-width:0}
+.ctl-name{white-space:nowrap}
+.ctl input[type=range]{width:120px;accent-color:var(--accent)}
+.ctl-val{color:var(--text);font-variant-numeric:tabular-nums;min-width:46px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.seg button{border:0;background:var(--panel);color:var(--muted);padding:5px 11px;font:inherit;
+  font-size:var(--fs-caption);cursor:pointer;border-right:1px solid var(--line)}
+.seg button:last-child{border-right:0}
+.seg button[aria-pressed="true"]{background:var(--accent);color:#fff}
+@media (prefers-color-scheme:dark){.seg button[aria-pressed="true"]{color:#12161c}}
+:root[data-theme="dark"] .seg button[aria-pressed="true"]{color:#12161c}
+button.act{border:1px solid var(--accent);background:var(--accent-soft);color:var(--accent);
+  font:inherit;font-size:var(--fs-caption);font-weight:700;padding:5px 12px;border-radius:8px;cursor:pointer;
+  transition:all var(--dur-s) var(--ease-out)}
+button.act:hover{background:var(--accent);color:#fff}
+.tile-row{display:flex;gap:10px;flex-wrap:wrap;margin:8px 0 2px}
+.tile{background:var(--field);border:1px solid var(--line);border-radius:8px;padding:7px 12px;min-width:110px}
+.tile span{display:block;font-size:var(--fs-caption);color:var(--muted)}
+.tile b{font-size:15px;font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+.tile b.warn{color:var(--ch-crit)}
+.tile small{display:block;font-size:10px;color:var(--muted)}
+.gauge{position:relative;height:22px;background:var(--field);border:1px solid var(--line);
+  border-radius:6px;margin:6px 0;overflow:hidden}
+.gauge i{position:absolute;inset:0 auto 0 0;background:var(--ch-good);opacity:.28;transition:width var(--dur-m) var(--ease-out)}
+.gauge span{position:relative;font-size:var(--fs-caption);color:var(--text);padding:0 9px;line-height:22px;white-space:nowrap}
+.leg{display:flex;gap:14px;flex-wrap:wrap;margin:2px 0 4px;font-size:var(--fs-caption);color:var(--muted)}
+.leg-it{display:inline-flex;align-items:center;gap:6px}
+.leg-it i{width:10px;height:10px;border-radius:3px;display:inline-block}
+.eng-note{font-size:var(--fs-label);color:var(--muted);margin-top:8px;line-height:1.65}
+.ch-tip{position:fixed;z-index:99;display:none;background:var(--panel);border:1px solid var(--line);
+  border-radius:8px;box-shadow:var(--shadow-float);padding:7px 10px;font-size:var(--fs-caption);
+  color:var(--text);pointer-events:none;line-height:1.5;font-variant-numeric:tabular-nums}
+
+/* ---------- 시트 발췌 ---------- */
+.fbar{display:flex;gap:8px;align-items:center;font-size:var(--fs-caption);color:var(--muted);
+  background:var(--field);border:1px solid var(--line);border-radius:7px;padding:5px 10px;margin-bottom:8px;
+  font-variant-numeric:tabular-nums;min-height:28px}
+.fbar b{color:var(--accent);font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;font-weight:600;
+  overflow-x:auto;white-space:nowrap;scrollbar-width:none}
+.fbar .ref{font-weight:800;color:var(--text);font-family:ui-monospace,Menlo,monospace}
+.sheet-wrap{overflow:auto;max-height:380px;border:1px solid var(--line);border-radius:7px}
+table.sheet{border-collapse:collapse;font-size:11.5px;font-variant-numeric:tabular-nums;min-width:100%}
+table.sheet th{position:sticky;background:var(--field);color:var(--muted);font-weight:600;
+  font-size:10px;padding:3px 7px;border:1px solid var(--line);z-index:2}
+table.sheet thead th{top:0}
+table.sheet tbody th{left:0;text-align:right;min-width:26px}
+table.sheet td{border:1px solid var(--line);padding:3px 8px;white-space:nowrap;color:var(--text);
+  max-width:220px;overflow:hidden;text-overflow:ellipsis}
+table.sheet td.b{font-weight:700}
+table.sheet td.f{background:var(--accent-soft)}
+table.sheet td.fx{cursor:default;box-shadow:inset 0 -1.5px 0 var(--accent)}
+table.sheet td.fx:hover{background:var(--accent-soft)}
+table.sheet td.num{text-align:right}
+.sheet-note{font-size:10.5px;color:var(--muted);margin-top:7px}
+
 .hidden{display:none}
 .empty{color:var(--muted);font-size:var(--fs-body);padding:34px 0;text-align:center}
 
@@ -131,14 +215,19 @@ footer a:hover{border-bottom-color:var(--accent)}
 <div class="wrap">
 
 <header>
-  <div class="eyebrow">Quantitative Modeling Portfolio</div>
-  <h1>최적화·시뮬레이션 모형 44선</h1>
-  <p class="lede">엑셀과 VBA로 직접 구현한 경영 최적화 모형 21종과 몬테카를로 시뮬레이션 모형 23종입니다.
-  항목을 열면 어떤 절차로 풀었는지, 무엇을 넣어 무엇이 나왔는지, 그 숫자를 어떻게 읽었는지가 함께 나옵니다.</p>
-  <div class="stats">
-    <div class="stat"><b>44</b><span>구현 모형</span></div>
-    <div class="stat"><b>21</b><span>최적화</span></div>
-    <div class="stat"><b>23</b><span>시뮬레이션</span></div>
+  <canvas id="hero" aria-hidden="true"></canvas>
+  <div class="wrap-inner">
+    <div class="eyebrow">Quantitative Modeling Portfolio</div>
+    <h1>최적화·시뮬레이션 모형 44선</h1>
+    <p class="lede">엑셀과 VBA로 직접 구현한 경영 최적화 모형 21종과 몬테카를로 시뮬레이션 모형 23종입니다.
+    항목을 열면 모형을 브라우저에서 직접 돌려보는 동적 패널, 원본 통합문서의 시트 발췌(수식 포함),
+    풀이 절차와 해석이 함께 나옵니다.</p>
+    <div class="stats">
+      <div class="stat"><b>44</b><span>구현 모형</span></div>
+      <div class="stat"><b>21</b><span>최적화</span></div>
+      <div class="stat"><b>23</b><span>시뮬레이션</span></div>
+      <div class="stat"><b>106</b><span>통합문서 시트 발췌</span></div>
+    </div>
   </div>
 </header>
 
@@ -179,14 +268,18 @@ footer a:hover{border-bottom-color:var(--accent)}
     <a href="https://jihongparker.github.io/hong-erp/" target="_blank" rel="noopener">ESG 의사결정 시스템</a>
     <a href="https://github.com/JihongParker/quant-lab" target="_blank" rel="noopener">이 페이지 저장소</a>
   </div>
-  <p class="note">모든 모형은 엑셀과 VBA로 직접 구현했습니다. 표에 실린 값은 구현한 통합문서의 계산 결과를
-  그대로 옮긴 것입니다. 난수를 쓰는 모형은 표시된 시행 조건에서 얻은 값이므로 다시 돌리면 달라질 수 있으며,
-  난수를 고정한 모형은 그 사실을 항목 안에 적었습니다. 원본 통합문서와 사용한 원자료는 포함하지 않습니다.</p>
+  <p class="note">모든 모형은 엑셀과 VBA로 직접 구현했습니다. 각 항목의 시트 발췌는 원본 통합문서에서 그대로 옮긴
+  값과 수식이며, 동적 패널은 같은 모수와 수식을 자바스크립트로 다시 구현해 브라우저에서 돌리는 재현입니다.
+  난수를 쓰는 패널은 돌릴 때마다 값이 흔들리므로 표의 엑셀 기록값과 다를 수 있고, 모수를 단순화한 패널은
+  그 사실을 패널 안에 적었습니다. 외부 의존성 없는 정적 페이지입니다.</p>
 </footer>
 
 </div>
 
 <script src="data.js"></script>
+<script src="grids.js"></script>
+<script src="engine-data.js"></script>
+<script src="engines.js"></script>
 <script>
 const el=(t,c,x)=>{const e=document.createElement(t);if(c)e.className=c;if(x!=null)e.textContent=x;return e};
 
@@ -196,8 +289,114 @@ function kvTable(rows,cls){
   return t;
 }
 
+/* ---------- 시트 발췌 렌더러 ---------- */
+const colName=(c)=>{let s="";while(c>0){s=String.fromCharCode(65+(c-1)%26)+s;c=Math.floor((c-1)/26)}return s};
+function sheetSlide(g){
+  const wrap=el("div");
+  const fbar=el("div","fbar");
+  const ref=el("span","ref","");
+  const fx=el("b",null,"셀 위에 마우스를 올리면 엑셀 수식이 보입니다");
+  fbar.append(ref,fx);
+  const sw=el("div","sheet-wrap");
+  const tb=el("table","sheet");
+  const map={};
+  g.cells.forEach(c=>{ (map[c[0]]=map[c[0]]||{})[c[1]]=c; });
+  const thead=el("thead"),hr=el("tr");
+  hr.appendChild(el("th",null,""));
+  for(let c=1;c<=g.nc;c++)hr.appendChild(el("th",null,colName(c)));
+  thead.appendChild(hr);tb.appendChild(thead);
+  const tbody=el("tbody");
+  for(let r=1;r<=g.nr;r++){
+    if(!map[r])continue;
+    const tr=el("tr");
+    tr.appendChild(el("th",null,String(r)));
+    for(let c=1;c<=g.nc;c++){
+      const cell=map[r]&&map[r][c];
+      const td=el("td",null,cell?cell[2]:"");
+      if(cell){
+        const style=cell[4]||0, formula=cell[3]||"";
+        if(style&1)td.classList.add("b");
+        if(style&2)td.classList.add("f");
+        if(/^[\d\-,.%()]+$/.test(cell[2]))td.classList.add("num");
+        if(formula){
+          td.classList.add("fx");
+          td.addEventListener("mouseenter",()=>{ref.textContent=colName(c)+r;fx.textContent=formula;});
+        }
+      }
+      tr.appendChild(td);
+    }
+    tbody.appendChild(tr);
+  }
+  tb.appendChild(tbody);sw.appendChild(tb);
+  wrap.append(fbar,sw);
+  if(g.tr>g.nr||g.tc>g.nc)
+    wrap.appendChild(el("div","sheet-note",`원본 ${g.tr.toLocaleString()}행 × ${g.tc}열 중 ${g.nr}행 × ${g.nc}열 발췌입니다. 밑줄 셀에는 수식이 들어 있습니다.`));
+  else
+    wrap.appendChild(el("div","sheet-note","밑줄 셀에는 수식이 들어 있습니다."));
+  return wrap;
+}
+
+/* ---------- 캐러셀 ---------- */
+function carousel(id){
+  const caro=el("div","caro");
+  const head=el("div","caro-head");
+  const prev=el("button","caro-btn","‹"), next=el("button","caro-btn","›");
+  prev.type=next.type="button";
+  prev.setAttribute("aria-label","이전 슬라이드");next.setAttribute("aria-label","다음 슬라이드");
+  const title=el("div","caro-title","");
+  const dots=el("div","caro-dots");
+  head.append(prev,title,dots,next);
+  const track=el("div","caro-track");
+  caro.append(head,track);
+
+  const gm=GRIDS[id]||{sheets:[]};
+  const slides=[];
+  if(ENGINES[id])slides.push({name:"동적 모형 — 직접 돌려보기",kind:"engine"});
+  gm.sheets.forEach((s,i)=>slides.push({name:`시트 발췌 — ${s.name}`,kind:"sheet",g:s}));
+  slides.forEach((s,i)=>{
+    const sl=el("div","slide");
+    sl.dataset.name=s.name;
+    track.appendChild(sl);
+    dots.appendChild(el("i",i===0?"on":null));
+    if(s.kind==="sheet"){
+      sl.dataset.lazy="sheet";sl._g=s.g;
+    }
+  });
+  let idx=0;
+  function build(i){
+    const sl=track.children[i];if(!sl)return;
+    if(sl.dataset.lazy==="sheet"&&!sl.hasChildNodes()){sl.appendChild(sheetSlide(sl._g));}
+  }
+  function show(i,scroll=true){
+    idx=Math.max(0,Math.min(slides.length-1,i));
+    title.textContent=slides[idx]?slides[idx].name:"";
+    [...dots.children].forEach((d,j)=>d.classList.toggle("on",j===idx));
+    prev.disabled=idx===0;next.disabled=idx===slides.length-1;
+    build(idx);build(idx+1);
+    if(scroll)track.scrollTo({left:idx*track.clientWidth,behavior:"smooth"});
+  }
+  prev.addEventListener("click",()=>show(idx-1));
+  next.addEventListener("click",()=>show(idx+1));
+  let st;
+  track.addEventListener("scroll",()=>{clearTimeout(st);st=setTimeout(()=>{
+    const i=Math.round(track.scrollLeft/track.clientWidth);
+    if(i!==idx)show(i,false);
+  },80)});
+  caro._init=()=>{ /* 카드 첫 오픈 시: 엔진 마운트 */
+    if(ENGINES[id]&&!caro._mounted){
+      caro._mounted=true;
+      const sl=track.children[0];
+      try{ENGINES[id](sl);}catch(e){sl.appendChild(el("p","eng-note","동적 패널을 불러오지 못했습니다: "+e.message));}
+    }
+    show(idx,false);
+  };
+  show(0,false);
+  return caro;
+}
+
 function build(item,i,prefix){
   const [title,desc,groups,tags,d]=item;
+  const id=prefix+String(i+1).padStart(2,"0");
   const card=el("details","card");
   card.dataset.groups=groups.join(",");
   card.dataset.search=[title,desc,tags.join(" "),groups.join(" "),d.steps.join(" "),
@@ -206,7 +405,7 @@ function build(item,i,prefix){
 
   const sum=el("summary");
   const top=el("div","card-top");
-  top.append(el("span","num",prefix+String(i+1).padStart(2,"0")),
+  top.append(el("span","num",id),
              el("h3",null,title), el("span","chev","▾"));
   sum.append(top, el("p","desc",desc));
   const tw=el("div","tags");
@@ -214,6 +413,18 @@ function build(item,i,prefix){
   sum.appendChild(tw);
 
   const body=el("div","body");
+  card._id=id;
+  card.addEventListener("toggle",()=>{
+    if(card.open&&!card._built){
+      card._built=true;
+      const caro=carousel(id);
+      body.prepend(caro);
+      caro._init();
+    }else if(card.open&&card._built){
+      const caro=body.querySelector(".caro");
+      if(caro&&caro._init)caro._init();
+    }
+  });
 
   const b1=el("div","block");
   b1.appendChild(el("div","blabel","풀이 절차"));
@@ -223,7 +434,7 @@ function build(item,i,prefix){
 
   const b2=el("div","block cols");
   const c1=el("div"); c1.append(el("div","blabel","입력값"), kvTable(d.in));
-  const c2=el("div"); c2.append(el("div","blabel","계산 결과"), kvTable(d.out,"out"));
+  const c2=el("div"); c2.append(el("div","blabel","계산 결과 (엑셀 기록값)"), kvTable(d.out,"out"));
   b2.append(c1,c2);
 
   const b3=el("div","block");
@@ -274,6 +485,8 @@ tg.addEventListener("click",()=>{
   cards.forEach(c=>{if(!c.classList.contains("hidden")) c.open=open});
   tg.textContent=open?"전부 접기":"전부 펼치기";
 });
+
+initHero(document.getElementById("hero"));
 </script>
 </body>
 </html>

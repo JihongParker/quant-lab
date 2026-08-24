@@ -8,6 +8,7 @@
 <style>
 :root{
   --bg:#f7f7f5; --bg0:rgb(247 247 245 / 0); --panel:#fff; --text:#1a1a1a; --muted:#6b6b6b; --line:#e4e4e0;
+  --grad:linear-gradient(100deg,#ff7729,#fa429e 32%,#8f4ff5 64%,#2e85fa);
   --accent:#2b4c7e; --accent-soft:#e8eef6; --field:#faf9f7;
 
   --ch-s1:#2a78d6; --ch-s2:#eb6834; --ch-s3:#1baf7a;
@@ -45,6 +46,23 @@ body{font-family:'Pretendard','Apple SD Gothic Neo',-apple-system,BlinkMacSystem
 p{text-wrap:pretty}
 .wrap{max-width:1020px;margin:0 auto;padding:0 22px}
 
+/* ---------- 오로라 배경 — 페이지 전체에 깔리는 은은한 색 숨결 ---------- */
+.aurora{position:fixed;inset:-12%;z-index:-1;pointer-events:none;filter:blur(72px) saturate(1.2);opacity:.4}
+@media (prefers-color-scheme:dark){.aurora{opacity:.28}}
+:root[data-theme="light"] .aurora{opacity:.4}
+:root[data-theme="dark"] .aurora{opacity:.28}
+.aurora i{position:absolute;width:46vw;height:46vw;border-radius:50%}
+.aurora i:nth-child(1){left:-8%;top:4%;background:radial-gradient(circle,rgba(250,66,158,.4),transparent 70%);
+  animation:au1 38s ease-in-out infinite alternate}
+.aurora i:nth-child(2){right:-8%;top:24%;background:radial-gradient(circle,rgba(46,133,250,.4),transparent 70%);
+  animation:au2 46s ease-in-out infinite alternate}
+.aurora i:nth-child(3){left:26%;bottom:-16%;background:radial-gradient(circle,rgba(255,119,41,.32),transparent 70%);
+  animation:au3 52s ease-in-out infinite alternate}
+@keyframes au1{to{transform:translate(9vw,13vh) scale(1.18)}}
+@keyframes au2{to{transform:translate(-7vw,11vh) scale(.88)}}
+@keyframes au3{to{transform:translate(6vw,-9vh) scale(1.14)}}
+@media (prefers-reduced-motion:reduce){.aurora i{animation:none}}
+
 header{position:relative;left:50%;margin-left:-50vw;width:100vw;overflow:hidden;
   background:#150c2b;padding:0;margin-bottom:6px}
 #hero{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
@@ -73,39 +91,51 @@ h1{font-size:clamp(30px,5.4vw,50px);line-height:1.14;letter-spacing:-.024em;font
 @media (prefers-reduced-motion:reduce){header .wrap-inner>*{animation:none}}
 
 .controls{position:sticky;top:0;z-index:20;background:var(--bg);
+  background:color-mix(in srgb,var(--bg) 76%,transparent);
+  -webkit-backdrop-filter:blur(14px) saturate(1.3);backdrop-filter:blur(14px) saturate(1.3);
   padding:16px 0 14px;border-bottom:1px solid var(--line);margin-bottom:34px}
 #q{width:100%;padding:10px 14px;border:1px solid var(--line);border-radius:9px;
   background:var(--panel);color:var(--text);font:inherit;font-size:var(--fs-body);
   transition:border-color var(--dur-s) var(--ease-out)}
-#q:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+#q:focus{outline:none;border-color:#8f4ff5;box-shadow:0 0 0 3px rgba(143,79,245,.16)}
 .filters{display:flex;gap:7px;flex-wrap:wrap;margin-top:11px;align-items:center}
 .chip{border:1px solid var(--line);background:var(--panel);color:var(--muted);
   padding:5px 12px;border-radius:999px;font:inherit;font-size:var(--fs-label);
   cursor:pointer;transition:all var(--dur-s) var(--ease-out)}
-.chip:hover{color:var(--text);border-color:var(--accent)}
-.chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff}
-@media (prefers-color-scheme:dark){.chip[aria-pressed="true"]{color:#12161c}}
-:root[data-theme="dark"] .chip[aria-pressed="true"]{color:#12161c}
+.chip:hover{color:var(--text);border-color:#8f4ff5}
+.chip[aria-pressed="true"]{background:linear-gradient(100deg,#fa429e,#8f4ff5);border-color:transparent;color:#fff}
+@media (prefers-color-scheme:dark){.chip[aria-pressed="true"]{color:#fff}}
+:root[data-theme="dark"] .chip[aria-pressed="true"]{color:#fff}
 .spacer{flex:1}
 .ghost{border-color:transparent;background:transparent}
 
 section{margin-bottom:56px}
-.sec-head{display:flex;align-items:baseline;gap:12px;margin-bottom:18px}
+.sec-head{display:flex;align-items:center;gap:12px;margin-bottom:18px}
+.sec-head::before{content:"";width:10px;height:26px;border-radius:5px;background:var(--grad);flex-shrink:0}
 h2{font-size:var(--fs-h2);letter-spacing:-.02em;font-weight:750}
-.count{font-size:var(--fs-label);color:var(--muted);font-variant-numeric:tabular-nums}
+.count{font-size:var(--fs-label);color:var(--accent);font-variant-numeric:tabular-nums;
+  background:var(--accent-soft);padding:2px 11px;border-radius:999px}
 
 .grid{display:grid;gap:12px}
 details.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;
   box-shadow:var(--shadow-raised);overflow:hidden;
-  transition:box-shadow var(--dur-m) var(--ease-out),border-color var(--dur-m) var(--ease-out)}
-details.card:hover{box-shadow:var(--shadow-float)}
-details.card[open]{border-color:var(--accent);box-shadow:var(--shadow-float)}
+  transition:box-shadow var(--dur-m) var(--ease-out),border-color var(--dur-m) var(--ease-out),
+             transform var(--dur-m) var(--ease-out)}
+details.card:hover{box-shadow:var(--shadow-float);transform:translateY(-2px)}
+details.card[open]{border-color:transparent;box-shadow:var(--shadow-float);
+  background:linear-gradient(var(--panel),var(--panel)) padding-box,var(--grad) border-box}
+details.card.rv{opacity:0;transform:translateY(16px);
+  transition:opacity .6s var(--ease-out),transform .6s var(--ease-out),
+             box-shadow var(--dur-m) var(--ease-out),border-color var(--dur-m) var(--ease-out)}
+details.card.rv.in{opacity:1;transform:none}
 summary{list-style:none;cursor:pointer;padding:18px 22px;display:block}
 summary::-webkit-details-marker{display:none}
 summary:focus-visible{outline:2px solid var(--accent);outline-offset:-3px}
 .card-top{display:flex;gap:13px;align-items:baseline}
-.num{font-size:var(--fs-caption);color:var(--accent);font-weight:800;
-  font-variant-numeric:tabular-nums;letter-spacing:.04em;min-width:30px;flex-shrink:0}
+.num{font-size:var(--fs-caption);font-weight:800;
+  font-variant-numeric:tabular-nums;letter-spacing:.04em;min-width:30px;flex-shrink:0;
+  background:linear-gradient(100deg,#fa429e,#8f4ff5);
+  -webkit-background-clip:text;background-clip:text;color:transparent}
 .card h3{font-size:var(--fs-h3);font-weight:700;letter-spacing:-.015em;flex:1;line-height:1.35}
 .chev{color:var(--muted);font-size:var(--fs-label);flex-shrink:0;
   transition:transform var(--dur-m) var(--ease-out)}
@@ -152,8 +182,8 @@ table.kv td:last-child{text-align:right;font-variant-numeric:tabular-nums;font-w
 .caro-btn:hover{border-color:var(--accent);color:var(--accent)}
 .caro-btn:disabled{opacity:.35;cursor:default}
 .caro-dots{display:flex;gap:5px;align-items:center}
-.caro-dots i{width:7px;height:7px;border-radius:50%;background:var(--line);transition:background var(--dur-s)}
-.caro-dots i.on{background:var(--accent)}
+.caro-dots i{width:7px;height:7px;border-radius:50%;background:var(--line);transition:background var(--dur-s);cursor:pointer}
+.caro-dots i.on{background:var(--grad)}
 .caro-track{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none}
 .caro-track::-webkit-scrollbar{display:none}
 .slide{flex:0 0 100%;scroll-snap-align:start;min-width:0;padding:14px 14px 16px;
@@ -177,7 +207,6 @@ table.kv td:last-child{text-align:right;font-variant-numeric:tabular-nums;font-w
 .slide.cur .anim:nth-child(4){transition-delay:.27s}
 .slide.cur table.sheet tbody tr{animation:rowIn .38s var(--ease-out) both}
 @keyframes rowIn{from{opacity:0;transform:translateX(8px)}to{opacity:1;transform:none}}
-table.sheet td.fx.fx-on{background:var(--accent);color:#fff}
 @media (prefers-reduced-motion:reduce){
   .slide .anim{transition:none;opacity:1;transform:none}
   .slide.cur table.sheet tbody tr{animation:none}
@@ -244,7 +273,9 @@ table.sheet td.num{text-align:right}
 .hidden{display:none}
 .empty{color:var(--muted);font-size:var(--fs-body);padding:34px 0;text-align:center}
 
-footer{border-top:1px solid var(--line);padding:32px 0 64px;color:var(--muted);font-size:13.5px}
+footer{border-top:0;position:relative;padding:32px 0 64px;color:var(--muted);font-size:13.5px}
+footer::before{content:"";position:absolute;top:0;left:0;right:0;height:2px;border-radius:1px;
+  background:var(--grad);opacity:.55}
 footer a{color:var(--accent);text-decoration:none;border-bottom:1px solid transparent;
   transition:border-color var(--dur-s) var(--ease-out)}
 footer a:hover{border-bottom-color:var(--accent)}
@@ -253,6 +284,7 @@ footer a:hover{border-bottom-color:var(--accent)}
 </style>
 </head>
 <body>
+<div class="aurora" aria-hidden="true"><i></i><i></i><i></i></div>
 <div class="wrap">
 
 <header>
@@ -469,7 +501,12 @@ function carousel(id,item){
       track.scrollTo({left:idx*track.clientWidth,behavior:"smooth"});
     }
   }
-  const touch=()=>{caro._touched=true;};
+  const inView=()=>{const r=caro.getBoundingClientRect();return r.bottom>60&&r.top<innerHeight-60;};
+  const touch=()=>{caro._hold=performance.now()+8000;};
+  track.addEventListener("pointerdown",touch,true);
+  track.addEventListener("input",()=>{
+    if(performance.now()-(caro._demoTs||0)>150)touch(); /* 자동 시연이 아닌 실제 조작만 */
+  },true);
   prev.addEventListener("click",()=>{touch();show(idx-1)});
   next.addEventListener("click",()=>{touch();show(idx+1)});
   dots.addEventListener("click",e=>{
@@ -485,24 +522,37 @@ function carousel(id,item){
   caro.addEventListener("mouseover",e=>{caro._hov=!!e.target.closest(".sheet-wrap")});
   caro.addEventListener("mouseleave",()=>{caro._hov=false});
 
-  /* 시트 수식 자동 투어 — 현재 슬라이드가 시트일 때 수식 셀을 차례로 짚어
-     수식바에 띄운다. 표 위에 마우스가 있으면 멈춘다(직접 살펴보는 중). */
-  caro._ti=-1;
-  function tourStep(){
-    if(document.hidden||caro._hov)return;
-    const s=slides[idx];if(!s||s.kind!=="sheet")return;
-    const sl=track.children[idx];if(!sl.hasChildNodes())return;
-    const cells=sl.querySelectorAll("td.fx");if(!cells.length)return;
-    caro._ti=(caro._ti+1)%cells.length;
-    sl.querySelectorAll("td.fx-on").forEach(c=>c.classList.remove("fx-on"));
-    const td=cells[caro._ti];
-    td.classList.add("fx-on");
-    const ref=sl.querySelector(".fbar .ref"),fx=sl.querySelector(".fbar b");
-    if(ref)ref.textContent=td.dataset.ref;
-    if(fx)fx.textContent=td.dataset.f;
-    const swp=td.closest(".sheet-wrap");
-    if(swp)swp.scrollTo({top:Math.max(0,td.offsetTop-swp.clientHeight/2),
-                         left:Math.max(0,td.offsetLeft-swp.clientWidth/2),behavior:"smooth"});
+  /* 동적 모형 자동 시연 — 엔진 슬라이드가 보일 때 조절값을 스스로 움직여
+     차트가 반응하는 모습을 보여준다. 사용자가 만지면 8초 양보한다. */
+  function demoStep(){
+    if(REDUCED||document.hidden)return;
+    const s=slides[idx];if(!s||s.kind!=="engine"||!caro._eng)return;
+    if(performance.now()<(caro._hold||0)||!inView())return;
+    const sl=caro._eng;
+    const ranges=[...sl.querySelectorAll('input[type=range]')];
+    const segs=[...sl.querySelectorAll('.seg button')];
+    caro._dn=(caro._dn||0)+1;
+    if(segs.length&&caro._dn%4===0){
+      caro._demoTs=performance.now();
+      segs[Math.floor(Math.random()*segs.length)].click();
+      return;
+    }
+    if(!ranges.length)return;
+    const r=ranges[caro._dn%ranges.length];
+    const min=+r.min,max=+r.max,step=+r.step||1;
+    const from=+r.value;
+    const to=Math.min(max,Math.max(min,Math.round((min+Math.random()*(max-min))/step)*step));
+    const t0=performance.now();
+    function an(ts){
+      if(performance.now()<(caro._hold||0))return; /* 사용자가 잡으면 즉시 물러남 */
+      const p=Math.min((ts-t0)/900,1);
+      const e=p<.5?2*p*p:1-Math.pow(-2*p+2,2)/2;
+      r.value=from+(to-from)*e;
+      caro._demoTs=performance.now();
+      r.dispatchEvent(new Event("input",{bubbles:true}));
+      if(p<1)requestAnimationFrame(an);
+    }
+    requestAnimationFrame(an);
   }
 
   caro._init=()=>{
@@ -514,16 +564,24 @@ function carousel(id,item){
     /* 열릴 때 등장 모션 재생 */
     const c=track.children[idx];
     if(c&&!REDUCED){c.classList.remove("cur");requestAnimationFrame(()=>requestAnimationFrame(()=>c.classList.add("cur")));}
-    /* 소개 → 결과 자동 진행 (첫 오픈에 한 번, 조작하면 취소) */
-    if(!REDUCED&&!caro._autoDone){
-      caro._autoDone=true;
-      caro._at=setTimeout(()=>{if(!caro._touched&&idx===0)show(1);},4500);
-    }
-    if(!caro._tour)caro._tour=setInterval(tourStep,2000);
+    /* 슬라이드 자동 순환 — 화면에 보일 때만, 조작하면 8초 쉬고 재개.
+       순환 범위는 소개→결과→동적 모형→첫 시트까지(동적 모형은 두 박자 머묾).
+       사용자가 뒤쪽 시트로 직접 넘어가 있으면 끌고 오지 않는다. */
+    const si=slides.findIndex(s=>s.kind==="sheet");
+    const cycleN=si>=0?si+1:slides.length;
+    if(!caro._auto&&!REDUCED)caro._auto=setInterval(()=>{
+      if(document.hidden||caro._hov||!inView())return;
+      if(performance.now()<(caro._hold||0))return;
+      if(idx>=cycleN)return;
+      caro._dwell=(caro._dwell||0)+1;
+      const need=slides[idx].kind==="engine"?2:1;
+      if(caro._dwell>=need){caro._dwell=0;show((idx+1)%cycleN);}
+    },5000);
+    if(!caro._demo&&!REDUCED)caro._demo=setInterval(demoStep,2400);
   };
   caro._stop=()=>{
-    clearInterval(caro._tour);caro._tour=null;
-    clearTimeout(caro._at);
+    clearInterval(caro._auto);caro._auto=null;
+    clearInterval(caro._demo);caro._demo=null;
   };
   show(0,false);
   return caro;
@@ -588,6 +646,15 @@ OPT.forEach((m,i)=>gOpt.appendChild(build(m,i,"O")));
 SIM.forEach((m,i)=>gSim.appendChild(build(m,i,"S")));
 
 const cards=[...document.querySelectorAll("details.card")];
+
+/* 스크롤 리빌 — 카드가 시야에 들어올 때 떠오른다 */
+if(!REDUCED){
+  const rv=new IntersectionObserver(es=>es.forEach(e=>{
+    if(e.isIntersecting){e.target.classList.add("in");rv.unobserve(e.target);}
+  }),{rootMargin:"0px 0px -30px"});
+  cards.forEach(c=>{c.classList.add("rv");rv.observe(c);});
+}
+
 const qEl=document.getElementById("q"), empty=document.getElementById("empty");
 let active="all";
 

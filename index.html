@@ -142,6 +142,48 @@ table.kv td:last-child{text-align:right;font-variant-numeric:tabular-nums;font-w
 .caro-track::-webkit-scrollbar{display:none}
 .slide{flex:0 0 100%;scroll-snap-align:start;min-width:0;padding:14px 14px 16px}
 
+/* ---------- 한눈에 보기 (인사이트 캐러셀) ---------- */
+.ins{margin-bottom:22px;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--panel)}
+details[open] .ins{animation:insIn .6s var(--ease-out) both}
+@keyframes insIn{from{opacity:0;transform:translateY(12px) scale(.98)}to{opacity:1;transform:none}}
+.ins-head{display:flex;align-items:center;gap:10px;padding:10px 12px;border-bottom:1px solid var(--line)}
+.ins-title{font-size:var(--fs-label);font-weight:700;flex:1;color:var(--text)}
+.ins-segs{display:flex;gap:6px;align-items:center}
+.ins-segs button{width:38px;height:5px;border-radius:3px;background:var(--line);border:0;padding:0;cursor:pointer;position:relative;overflow:hidden}
+.ins-segs button i{position:absolute;inset:0 auto 0 0;width:0;background:linear-gradient(90deg,#ff7729,#fa429e,#8f4ff5);border-radius:3px}
+.ins-stage{position:relative;height:264px;background:#150c2b}
+@media (max-width:560px){.ins-stage{height:320px}}
+.ins-slide{position:absolute;inset:0;opacity:0;transform:scale(1.035);filter:blur(10px) saturate(1.35);
+  transition:opacity .7s var(--ease-out),transform .7s var(--ease-out),filter .7s var(--ease-out);pointer-events:none}
+.ins-slide.on{opacity:1;transform:none;filter:none;pointer-events:auto}
+.ins-cv{position:absolute;inset:0;width:100%;height:100%;display:block}
+.ins-fg{position:absolute;inset:0;padding:20px 24px;display:flex;flex-direction:column;justify-content:center;gap:9px;max-width:58%;
+  color:#fff;background:linear-gradient(90deg,rgba(16,8,34,.5) 30%,rgba(16,8,34,.16) 74%,transparent);
+  text-shadow:0 1px 14px rgba(18,6,40,.55)}
+.ins-eyebrow{font-size:var(--fs-caption);letter-spacing:.16em;text-transform:uppercase;font-weight:800;color:rgba(255,255,255,.85)}
+.ins-big{font-size:17.5px;font-weight:700;line-height:1.5;letter-spacing:-.01em;text-wrap:pretty}
+.ins-sub{font-size:var(--fs-label);color:rgba(255,255,255,.84);line-height:1.65;text-wrap:pretty}
+.ins-key{display:inline-block;background:rgba(255,255,255,.95);color:#6d28d9;font-size:20px;font-weight:800;letter-spacing:-.015em;
+  padding:7px 18px;border-radius:999px;text-shadow:none;box-shadow:0 8px 24px -8px rgba(20,6,50,.55);
+  transform:translateY(8px);opacity:0;transition:transform .6s .25s var(--ease-out),opacity .6s .25s var(--ease-out)}
+.ins-slide.on .ins-key{transform:none;opacity:1}
+.ins-tiles{display:flex;gap:10px;flex-wrap:wrap}
+.ins-tile{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.32);border-radius:12px;padding:9px 14px;min-width:118px;
+  -webkit-backdrop-filter:blur(14px) saturate(1.5);backdrop-filter:blur(14px) saturate(1.5);
+  transition:border-color .3s,box-shadow .3s,background .3s}
+.ins-tile.hi{border-color:rgba(255,255,255,.9);background:rgba(255,255,255,.22);
+  box-shadow:0 0 0 3px rgba(255,255,255,.28),0 10px 30px -10px rgba(255,190,120,.5)}
+.ins-tile span{display:block;font-size:var(--fs-caption);color:rgba(255,255,255,.8);text-shadow:none}
+.ins-tile b{font-size:19px;font-variant-numeric:tabular-nums;letter-spacing:-.01em;color:#fff}
+@media (max-width:560px){
+  .ins-fg{max-width:100%;justify-content:flex-end;padding-bottom:18px;
+    background:linear-gradient(0deg,rgba(16,8,34,.62) 32%,rgba(16,8,34,.15) 68%,transparent)}
+}
+@media (prefers-reduced-motion:reduce){
+  details[open] .ins{animation:none}
+  .ins-slide{transition:opacity .25s;transform:none;filter:none}
+}
+
 /* ---------- 동적 패널 ---------- */
 canvas.ch{width:100%;display:block;margin:10px 0 4px}
 .ctl-row{display:flex;gap:14px;flex-wrap:wrap;align-items:center;margin:2px 0 6px}
@@ -280,6 +322,7 @@ footer a:hover{border-bottom-color:var(--accent)}
 <script src="grids.js"></script>
 <script src="engine-data.js"></script>
 <script src="engines.js"></script>
+<script src="insight.js"></script>
 <script>
 const el=(t,c,x)=>{const e=document.createElement(t);if(c)e.className=c;if(x!=null)e.textContent=x;return e};
 
@@ -419,10 +462,16 @@ function build(item,i,prefix){
       card._built=true;
       const caro=carousel(id);
       body.prepend(caro);
+      body.prepend(insightMount(item,id));
       caro._init();
     }else if(card.open&&card._built){
       const caro=body.querySelector(".caro");
       if(caro&&caro._init)caro._init();
+      const ins=body.querySelector(".ins");
+      if(ins&&ins._wake)ins._wake();
+    }else if(!card.open&&card._built){
+      const ins=body.querySelector(".ins");
+      if(ins&&ins._sleep)ins._sleep();
     }
   });
 

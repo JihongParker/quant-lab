@@ -199,11 +199,17 @@ table.kv td:last-child{text-align:right;font-variant-numeric:tabular-nums;font-w
 .caro-dots i.on{background:var(--grad)}
 .caro-track{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none}
 .caro-track::-webkit-scrollbar{display:none}
-.slide{flex:0 0 100%;scroll-snap-align:start;min-width:0;padding:14px 14px 16px;
+.slide{flex:0 0 100%;scroll-snap-align:start;min-width:0;padding:18px 20px 20px;
   display:flex;flex-direction:column}
 
 /* ---------- 카드 캐러셀: 인트로·결과 슬라이드와 잔잔한 모션 ---------- */
-.sl-pad{padding:10px 10px 6px;min-height:250px;flex:1;display:flex;flex-direction:column;justify-content:center}
+.sl-pad{padding:8px 8px 4px;min-height:230px;flex:1;display:flex;flex-direction:column;justify-content:center}
+.sl-duo{flex:1;display:grid;grid-template-columns:1.08fr 1fr;gap:30px;align-items:center;
+  padding:12px 8px;min-height:240px}
+@media (max-width:640px){.sl-duo{grid-template-columns:1fr;gap:20px;align-items:start}}
+.sl-duo .read{font-size:var(--fs-label)}
+.sl-tgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:12px 0 14px}
+.sl-tgrid-w{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin:2px 0 16px}
 .sl-eyebrow{font-size:var(--fs-caption);letter-spacing:.12em;text-transform:uppercase;
   color:var(--accent);font-weight:800;margin-bottom:10px}
 .sl-big{font-size:16.5px;font-weight:650;line-height:1.55;letter-spacing:-.01em;max-width:60ch;margin-bottom:14px}
@@ -464,48 +470,77 @@ function carousel(id,item){
   caro.append(head,track);
 
   const gm=GRIDS[id]||{sheets:[]};
-  const slides=[
-    {name:"소개 — 왜 이 모형인가",kind:"intro"},
-    {name:"결과 읽기 — 엑셀 기록값",kind:"result"},
-  ];
-  if(ENGINES[id])slides.push({name:"동적 모형 — 직접 돌려보기",kind:"engine"});
-  gm.sheets.forEach(s=>slides.push({name:`시트 발췌 — ${s.name}`,kind:"sheet",g:s}));
-
   const firstSentence=s=>{const i=s.indexOf("다. ");return i>0?s.slice(0,i+2):s};
   const counts=[];
+
+  /* 카드 성격별 구성 — 전 카드 동일 레이아웃을 강제하지 않는다.
+     시뮬레이션은 동적 모형이 본질이라 첫 슬라이드로, 최적화는 소개부터.
+     결과가 5항 이하면 소개·결과를 한 장(콤보)에, 6항 이상이면
+     소개(태그·메타 확장)와 결과 그리드를 각각 한 장씩. */
+  const isSim=id[0]==="S", rich=d.out.length>=6;
+  const slides=[];
+  if(isSim&&ENGINES[id])slides.push({name:"동적 모형 — 직접 돌려보기",kind:"engine"});
+  if(rich){
+    slides.push({name:"소개 — 왜 이 모형인가",kind:"intro"});
+    slides.push({name:"결과 읽기 — 엑셀 기록값",kind:"result"});
+  }else slides.push({name:"소개와 결과 — 한눈에",kind:"combo"});
+  if(!isSim&&ENGINES[id])slides.push({name:"동적 모형 — 직접 돌려보기",kind:"engine"});
+  gm.sheets.forEach(s=>slides.push({name:`시트 발췌 — ${s.name}`,kind:"sheet",g:s}));
+
+  function introLeft(){
+    const w=el("div");
+    w.append(el("div","sl-eyebrow anim","왜 필요한가"),el("p","sl-big anim",desc));
+    const kr=el("div","sl-krow anim");
+    kr.append(el("span","sl-key",tags[0]),el("p","sl-sub",d.steps[0]));
+    w.appendChild(kr);
+    const meta=el("div","sl-meta anim");
+    [[d.steps.length+"단계","풀이"],[d.in.length+"항","입력"],[d.out.length+"항","결과"],
+     [gm.sheets.length+"장","시트 발췌"]].forEach(([v,k])=>{
+      if(v[0]==="0")return;
+      const c=el("span","sl-mchip");
+      c.append(el("b",null,v),document.createTextNode(k));
+      meta.appendChild(c);
+    });
+    tags.slice(1).forEach(t=>meta.appendChild(el("span","sl-mchip",t)));
+    w.appendChild(meta);
+    return w;
+  }
+  function tileGrid(n,cls){
+    const tr=el("div",cls);
+    d.out.slice(0,n).forEach(([k,v])=>{
+      const t=el("div","tile");
+      t.append(el("span",null,k),el("b",null,v));
+      const p=parseNum(v); if(p)counts.push({el:t.lastChild,p});
+      tr.appendChild(t);
+    });
+    return tr;
+  }
+
   slides.forEach((s,i)=>{
     const sl=el("div","slide");
     track.appendChild(sl);
     dots.appendChild(el("i",i===0?"on":null));
     if(s.kind==="sheet"){sl.dataset.lazy="sheet";sl._g=s.g;}
     else if(s.kind==="engine"){caro._eng=sl;}
+    else if(s.kind==="combo"){
+      const w=el("div","sl-duo");
+      w.appendChild(introLeft());
+      const rc=el("div","anim");
+      rc.append(el("div","sl-eyebrow","결과 — 엑셀 기록값"),
+                tileGrid(4,"sl-tgrid"),
+                el("div","read",firstSentence(d.read)));
+      w.appendChild(rc);
+      sl.appendChild(w);
+    }
     else if(s.kind==="intro"){
       const w=el("div","sl-pad");
-      w.append(el("div","sl-eyebrow anim","왜 필요한가"),el("p","sl-big anim",desc));
-      const kr=el("div","sl-krow anim");
-      kr.append(el("span","sl-key",tags[0]),el("p","sl-sub",d.steps[0]));
-      w.appendChild(kr);
-      const meta=el("div","sl-meta anim");
-      [[d.steps.length+"단계","풀이"],[d.in.length+"항","입력"],[d.out.length+"항","결과"],
-       [gm.sheets.length+"장","시트 발췌"]].forEach(([v,k])=>{
-        if(v[0]==="0")return;
-        const c=el("span","sl-mchip");
-        c.append(el("b",null,v),document.createTextNode(k));
-        meta.appendChild(c);
-      });
-      w.appendChild(meta);
+      w.appendChild(introLeft());
       sl.appendChild(w);
     }else{
       const w=el("div","sl-pad");
       w.appendChild(el("div","sl-eyebrow anim","결과 읽기 — 엑셀 기록값"));
-      const tr=el("div","tile-row anim");
-      d.out.slice(0,4).forEach(([k,v])=>{
-        const t=el("div","tile");
-        t.append(el("span",null,k),el("b",null,v));
-        const p=parseNum(v); if(p)counts.push({el:t.lastChild,p});
-        tr.appendChild(t);
-      });
-      w.append(tr,el("div","read anim sl-read",firstSentence(d.read)));
+      w.append(tileGrid(8,"sl-tgrid-w anim"),
+               el("div","read anim sl-read",d.read));
       sl.appendChild(w);
     }
   });
@@ -522,7 +557,7 @@ function carousel(id,item){
     prev.disabled=idx===0;next.disabled=idx===slides.length-1;
     build(idx);build(idx+1);
     [...track.children].forEach((s,j)=>s.classList.toggle("cur",j===idx));
-    if(slides[idx].kind==="result"&&!caro._counted){caro._counted=true;countUp(counts);}
+    if((slides[idx].kind==="result"||slides[idx].kind==="combo")&&!caro._counted){caro._counted=true;countUp(counts);}
     if(scroll){
       caro._prog=true;clearTimeout(caro._pt);
       caro._pt=setTimeout(()=>caro._prog=false,700);

@@ -146,35 +146,48 @@ details[open] .chev{transform:rotate(180deg)}
   font-size:var(--fs-caption);padding:3px 9px;border-radius:6px;white-space:nowrap}
 .tag.key{background:var(--accent-soft);border-color:transparent;color:var(--accent);font-weight:700}
 
-.body{border-top:1px solid var(--line);background:var(--field);padding:20px 22px 22px}
-.block{margin-bottom:20px}
+.body{border-top:1px solid var(--line);background:var(--field);padding:22px 24px 24px}
+.block{margin-bottom:24px}
 .block:last-child{margin-bottom:0}
 .blabel{font-size:var(--fs-caption);letter-spacing:.1em;text-transform:uppercase;
-  color:var(--accent);font-weight:700;margin-bottom:10px}
+  color:var(--accent);font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:9px}
+.blabel::before{content:"";width:18px;height:4px;border-radius:2px;background:var(--grad)}
 ol.steps{margin:0;padding-left:0;list-style:none;counter-reset:s}
-ol.steps li{counter-increment:s;position:relative;padding-left:30px;margin-bottom:8px;
+ol.steps li{counter-increment:s;position:relative;padding-left:36px;margin-bottom:14px;
   font-size:var(--fs-body);color:var(--text)}
 ol.steps li:last-child{margin-bottom:0}
-ol.steps li::before{content:counter(s);position:absolute;left:0;top:1px;
-  width:20px;height:20px;border-radius:50%;background:var(--accent-soft);color:var(--accent);
-  font-size:var(--fs-caption);font-weight:700;display:grid;place-items:center}
+ol.steps li::before{content:counter(s);position:absolute;left:0;top:0;
+  width:23px;height:23px;border-radius:50%;
+  background:linear-gradient(130deg,#fa429e,#8f4ff5);color:#fff;
+  font-size:var(--fs-caption);font-weight:700;display:grid;place-items:center;
+  box-shadow:0 3px 8px -3px rgba(143,79,245,.55)}
+ol.steps li:not(:last-child)::after{content:"";position:absolute;left:11px;top:27px;bottom:-12px;
+  width:1.5px;background:linear-gradient(rgba(143,79,245,.35),var(--line))}
 
-.cols{display:grid;grid-template-columns:1fr 1fr;gap:20px}
-@media (max-width:640px){.cols{grid-template-columns:1fr;gap:20px}}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media (max-width:640px){.cols{grid-template-columns:1fr;gap:14px}}
+.cols>div{background:var(--panel);border:1px solid var(--line);border-radius:12px;
+  padding:16px 18px 14px;box-shadow:var(--shadow-raised)}
 table.kv{width:100%;border-collapse:collapse;font-size:13.5px}
-table.kv tr{border-bottom:1px solid var(--line)}
+table.kv tr{border-bottom:1px dashed var(--line)}
 table.kv tr:last-child{border-bottom:none}
-table.kv td{padding:6px 0;vertical-align:top}
+table.kv td{padding:7px 0;vertical-align:top}
 table.kv td:first-child{color:var(--muted);padding-right:14px}
 table.kv td:last-child{text-align:right;font-variant-numeric:tabular-nums;font-weight:650}
 .out td:last-child{color:var(--accent)}
+.out tr:first-child td:last-child{font-size:16.5px;font-weight:750}
 
-.read{background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--accent);
-  border-radius:8px;padding:13px 16px;font-size:var(--fs-body);color:var(--text)}
+.read{background:var(--panel);border:1px solid var(--line);position:relative;overflow:hidden;
+  border-radius:10px;padding:14px 17px 14px 21px;font-size:var(--fs-body);color:var(--text);
+  box-shadow:var(--shadow-raised)}
+.read::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--grad)}
 
 /* ---------- 캐러셀 ---------- */
-.caro{margin-bottom:22px;background:var(--panel);border:1px solid var(--line);border-radius:10px;overflow:hidden}
-.caro-head{display:flex;align-items:center;gap:10px;padding:10px 12px;border-bottom:1px solid var(--line)}
+.caro{margin-bottom:24px;background:var(--panel);border:1px solid var(--line);border-radius:14px;
+  overflow:hidden;box-shadow:var(--shadow-raised)}
+.caro-head{display:flex;align-items:center;gap:10px;padding:10px 12px;border-bottom:1px solid var(--line);position:relative}
+.caro-head::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:1px;
+  background:var(--grad);opacity:.35}
 .caro-title{font-size:var(--fs-label);font-weight:700;flex:1;color:var(--text)}
 .caro-btn{border:1px solid var(--line);background:var(--panel);color:var(--text);
   width:28px;height:28px;border-radius:8px;cursor:pointer;font-size:14px;line-height:1;
@@ -195,9 +208,14 @@ table.kv td:last-child{text-align:right;font-variant-numeric:tabular-nums;font-w
   color:var(--accent);font-weight:800;margin-bottom:10px}
 .sl-big{font-size:16.5px;font-weight:650;line-height:1.55;letter-spacing:-.01em;max-width:60ch;margin-bottom:14px}
 .sl-krow{display:flex;gap:12px;align-items:flex-start}
-.sl-key{background:var(--accent-soft);color:var(--accent);font-weight:800;font-size:var(--fs-body);
-  padding:5px 13px;border-radius:999px;white-space:nowrap;flex-shrink:0}
+.sl-key{background:linear-gradient(100deg,rgba(250,66,158,.13),rgba(143,79,245,.13));
+  border:1px solid rgba(143,79,245,.3);color:var(--accent);font-weight:800;font-size:var(--fs-body);
+  padding:5px 14px;border-radius:999px;white-space:nowrap;flex-shrink:0}
 .sl-sub{font-size:var(--fs-label);color:var(--muted);line-height:1.7;margin:0}
+.sl-meta{display:flex;gap:8px;margin-top:18px;flex-wrap:wrap}
+.sl-mchip{font-size:var(--fs-caption);border:1px solid var(--line);background:var(--panel);
+  border-radius:999px;padding:4px 12px;color:var(--muted)}
+.sl-mchip b{color:var(--text);font-variant-numeric:tabular-nums;margin-right:4px}
 .sl-read{margin-top:14px}
 .slide .anim{opacity:0;transform:translateY(10px);
   transition:opacity .5s var(--ease-out),transform .5s var(--ease-out)}
@@ -231,9 +249,11 @@ button.act{border:1px solid var(--accent);background:var(--accent-soft);color:va
   transition:all var(--dur-s) var(--ease-out)}
 button.act:hover{background:var(--accent);color:#fff}
 .tile-row{display:flex;gap:10px;flex-wrap:wrap;margin:8px 0 2px}
-.tile{background:var(--field);border:1px solid var(--line);border-radius:8px;padding:7px 12px;min-width:110px}
+.tile{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:9px 14px 8px;
+  min-width:120px;position:relative;overflow:hidden;box-shadow:var(--shadow-raised)}
+.tile::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:var(--grad);opacity:.75}
 .tile span{display:block;font-size:var(--fs-caption);color:var(--muted)}
-.tile b{font-size:15px;font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+.tile b{font-size:16px;font-variant-numeric:tabular-nums;letter-spacing:-.01em}
 .tile b.warn{color:var(--ch-crit)}
 .tile small{display:block;font-size:10px;color:var(--muted)}
 .gauge{position:relative;height:22px;background:var(--field);border:1px solid var(--line);
@@ -296,10 +316,8 @@ footer a:hover{border-bottom-color:var(--accent)}
     항목을 열면 모형을 브라우저에서 직접 돌려보는 동적 패널, 원본 통합문서의 시트 발췌(수식 포함),
     풀이 절차와 해석이 함께 나옵니다.</p>
     <div class="stats">
-      <div class="stat"><b>44</b><span>구현 모형</span></div>
       <div class="stat"><b>21</b><span>최적화</span></div>
       <div class="stat"><b>23</b><span>시뮬레이션</span></div>
-      <div class="stat"><b>106</b><span>통합문서 시트 발췌</span></div>
     </div>
   </div>
 </header>
@@ -466,7 +484,17 @@ function carousel(id,item){
       w.append(el("div","sl-eyebrow anim","왜 필요한가"),el("p","sl-big anim",desc));
       const kr=el("div","sl-krow anim");
       kr.append(el("span","sl-key",tags[0]),el("p","sl-sub",d.steps[0]));
-      w.appendChild(kr);sl.appendChild(w);
+      w.appendChild(kr);
+      const meta=el("div","sl-meta anim");
+      [[d.steps.length+"단계","풀이"],[d.in.length+"항","입력"],[d.out.length+"항","결과"],
+       [gm.sheets.length+"장","시트 발췌"]].forEach(([v,k])=>{
+        if(v[0]==="0")return;
+        const c=el("span","sl-mchip");
+        c.append(el("b",null,v),document.createTextNode(k));
+        meta.appendChild(c);
+      });
+      w.appendChild(meta);
+      sl.appendChild(w);
     }else{
       const w=el("div","sl-pad");
       w.appendChild(el("div","sl-eyebrow anim","결과 읽기 — 엑셀 기록값"));

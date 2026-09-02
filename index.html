@@ -5,6 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Quant Lab — 최적화·시뮬레이션 모형 44선 | 박지홍</title>
 <meta name="description" content="엑셀과 VBA로 직접 구현한 경영 최적화 21종, 몬테카를로 시뮬레이션 23종. 모든 모형을 브라우저에서 직접 돌려보는 동적 패널과 원본 통합문서 발췌를 함께 싣습니다.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Quant Lab — 최적화·시뮬레이션 모형 44선">
+<meta property="og:description" content="엑셀·VBA로 구현한 계량 모형 44종을 브라우저에서 직접 돌려보는 인터랙티브 포트폴리오. 엑셀 기록값 402건, 수식 포함 시트 발췌 106장, 외부 의존성 0.">
+<meta property="og:url" content="https://jihongparker.github.io/quant-lab/">
+<meta property="og:image" content="https://jihongparker.github.io/quant-lab/og.png">
+<meta name="twitter:card" content="summary_large_image">
 <style>
 :root{
   --bg:#f7f7f5; --bg0:rgb(247 247 245 / 0); --panel:#fff; --text:#1a1a1a; --muted:#6b6b6b; --line:#e4e4e0;
@@ -75,6 +81,7 @@ header .wrap-inner>*{animation:heroIn .8s var(--ease-out) both}
 header .wrap-inner>*:nth-child(2){animation-delay:.1s}
 header .wrap-inner>*:nth-child(3){animation-delay:.2s}
 header .wrap-inner>*:nth-child(4){animation-delay:.3s}
+header .wrap-inner>*:nth-child(5){animation-delay:.42s}
 @keyframes heroIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
 .eyebrow{font-size:var(--fs-caption);letter-spacing:.18em;text-transform:uppercase;
   color:rgba(255,255,255,.88);font-weight:800;margin-bottom:14px;text-shadow:0 1px 12px rgba(18,6,44,.5)}
@@ -88,6 +95,11 @@ h1{font-size:clamp(30px,5.4vw,50px);line-height:1.14;letter-spacing:-.024em;font
 .stat b{display:block;font-size:26px;font-weight:700;font-variant-numeric:tabular-nums;
   letter-spacing:-.02em;line-height:1.2;color:#fff}
 .stat span{font-size:var(--fs-label);color:rgba(255,255,255,.82)}
+.proof{display:flex;gap:8px 22px;flex-wrap:wrap;margin-top:16px;padding:10px 18px;border-radius:12px;
+  background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.24);
+  -webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);
+  font-size:var(--fs-label);color:rgba(255,255,255,.85);width:fit-content}
+.proof b{color:#fff;font-variant-numeric:tabular-nums;margin-right:5px}
 @media (prefers-reduced-motion:reduce){header .wrap-inner>*{animation:none}}
 
 .controls{position:sticky;top:0;z-index:20;background:var(--bg);
@@ -181,6 +193,57 @@ table.kv td:last-child{text-align:right;font-variant-numeric:tabular-nums;font-w
   border-radius:10px;padding:14px 17px 14px 21px;font-size:var(--fs-body);color:var(--text);
   box-shadow:var(--shadow-raised)}
 .read::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--grad)}
+
+/* ---------- 대표 모형 벤토 ---------- */
+#featured{margin-top:42px}
+.bento{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;grid-auto-rows:152px}
+.bt{position:relative;display:block;background:var(--panel);border:1px solid var(--line);border-radius:14px;
+  overflow:hidden;box-shadow:var(--shadow-raised);text-decoration:none;color:var(--text);
+  transition:transform var(--dur-m) var(--ease-out),box-shadow var(--dur-m) var(--ease-out),
+             border-color var(--dur-m) var(--ease-out),opacity .7s var(--ease-out)}
+.bt:hover{transform:translateY(-3px);box-shadow:var(--shadow-float);border-color:transparent;
+  background:linear-gradient(var(--panel),var(--panel)) padding-box,var(--grad) border-box}
+.bt-lg{grid-column:span 2;grid-row:span 2}
+.bt-cv{position:absolute;inset:0;width:100%;height:100%;opacity:.6;transition:opacity var(--dur-m) var(--ease-out)}
+.bt:hover .bt-cv{opacity:1}
+.bt-tx{position:absolute;inset:auto 0 0 0;padding:13px 16px;
+  background:linear-gradient(transparent,color-mix(in srgb,var(--panel) 90%,transparent) 42%)}
+.bt-tag{font-size:var(--fs-caption);font-weight:800;letter-spacing:.08em;color:var(--accent)}
+.bt h3{font-size:16px;font-weight:750;letter-spacing:-.01em;margin:3px 0 5px;line-height:1.3}
+.bt p{font-size:var(--fs-label);color:var(--muted);line-height:1.55;margin-bottom:7px;max-width:48ch}
+.bt-kpi{display:inline-block;font-size:var(--fs-caption);font-weight:750;color:var(--accent);
+  background:var(--accent-soft);padding:3px 10px;border-radius:999px;font-variant-numeric:tabular-nums}
+.bt:not(.bt-lg) p{display:none}
+@media (max-width:720px){.bento{grid-template-columns:1fr 1fr;grid-auto-rows:142px}.bt-lg{grid-column:span 2}}
+
+/* ---------- 케이스 스터디 ---------- */
+#cases{margin-top:56px}
+.case{display:grid;grid-template-columns:1.3fr .8fr;gap:30px;align-items:center;
+  background:var(--panel);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow-raised);
+  padding:28px 30px;margin-bottom:14px}
+.case.rev .case-tx{order:2}
+.case-eyebrow{font-size:var(--fs-caption);letter-spacing:.12em;text-transform:uppercase;
+  color:var(--accent);font-weight:800}
+.case h3{font-size:20px;letter-spacing:-.015em;margin:9px 0 13px;line-height:1.35}
+.case p{font-size:var(--fs-body);margin-bottom:10px;line-height:1.75}
+.case p b{color:var(--accent);font-variant-numeric:tabular-nums}
+.case-link{display:inline-block;margin-top:4px;color:var(--accent);text-decoration:none;
+  font-weight:700;font-size:var(--fs-body);border-bottom:1px solid transparent;
+  transition:border-color var(--dur-s) var(--ease-out)}
+.case-link:hover{border-bottom-color:var(--accent)}
+.case-kpis{display:grid;gap:10px}
+.case-kpis .tile b{font-size:17px}
+@media (max-width:720px){.case{grid-template-columns:1fr;padding:22px}.case.rev .case-tx{order:0}}
+
+/* 공통 스크롤 리빌 */
+.rv-g{opacity:0;transform:translateY(18px);
+  transition:opacity .7s var(--ease-out),transform .7s var(--ease-out)}
+.rv-g.in{opacity:1;transform:none}
+.bt.rv-g{transition:transform .55s var(--ease-out),box-shadow var(--dur-m) var(--ease-out),
+  border-color var(--dur-m) var(--ease-out),opacity .7s var(--ease-out)}
+@media (prefers-reduced-motion:reduce){.rv-g{opacity:1;transform:none;transition:none}}
+details.card{scroll-margin-top:120px}
+.seo-idx{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
 
 /* ---------- 캐러셀 ---------- */
 .caro{margin-bottom:24px;background:var(--panel);border:1px solid var(--line);border-radius:14px;
@@ -325,8 +388,122 @@ footer a:hover{border-bottom-color:var(--accent)}
       <div class="stat"><b>21</b><span>최적화</span></div>
       <div class="stat"><b>23</b><span>시뮬레이션</span></div>
     </div>
+    <div class="proof">
+      <span><b>402</b>엑셀 기록값 그대로</span>
+      <span><b>106</b>시트 발췌 · 수식 포함</span>
+      <span><b>44</b>브라우저 재현 엔진</span>
+      <span><b>0</b>외부 라이브러리</span>
+    </div>
   </div>
 </header>
+
+<section id="featured">
+  <div class="sec-head"><h2>대표 모형</h2><span class="count">6선</span></div>
+  <div class="bento">
+    <a class="bt bt-lg rv-g" href="#O16" data-card="O16" data-viz="frontier">
+      <canvas class="bt-cv" aria-hidden="true"></canvas>
+      <div class="bt-tx">
+        <span class="bt-tag">최적화 · O16</span>
+        <h3>최소분산 포트폴리오</h3>
+        <p>상관행렬로 공분산을 구성하고, 목표 수익률 제약 아래 분산을 최소화하는 비중을 도출합니다.</p>
+        <b class="bt-kpi">변동성 60.64% → 32.48%</b>
+      </div>
+    </a>
+    <a class="bt bt-lg rv-g" href="#S12" data-card="S12" data-viz="tail">
+      <canvas class="bt-cv" aria-hidden="true"></canvas>
+      <div class="bt-tx">
+        <span class="bt-tag">시뮬레이션 · S12</span>
+        <h3>포트폴리오 최대예상손실액</h3>
+        <p>상관행렬을 촐레스키 분해해 난수 생성 단계에 상관 구조를 심고, 손익 분포의 하위 분위로 손실을 확정합니다.</p>
+        <b class="bt-kpi">무상관 Z → 상관 Z · 500회</b>
+      </div>
+    </a>
+    <a class="bt rv-g" href="#O07" data-card="O07" data-viz="descent">
+      <canvas class="bt-cv" aria-hidden="true"></canvas>
+      <div class="bt-tx">
+        <span class="bt-tag">최적화 · O07</span>
+        <h3>유전 알고리즘 해법</h3>
+        <b class="bt-kpi">전역 탐색으로 국소해 검증</b>
+      </div>
+    </a>
+    <a class="bt rv-g" href="#S05" data-card="S05" data-viz="hist">
+      <canvas class="bt-cv" aria-hidden="true"></canvas>
+      <div class="bt-tx">
+        <span class="bt-tag">시뮬레이션 · S05</span>
+        <h3>항공기 초과예약</h3>
+        <b class="bt-kpi">몇 석 더 받을지 확률로 결정</b>
+      </div>
+    </a>
+    <a class="bt rv-g" href="#S20" data-card="S20" data-viz="paths">
+      <canvas class="bt-cv" aria-hidden="true"></canvas>
+      <div class="bt-tx">
+        <span class="bt-tag">시뮬레이션 · S20</span>
+        <h3>델타헤지</h3>
+        <b class="bt-kpi">헤지 손익 평균 1,359 ≈ 0</b>
+      </div>
+    </a>
+    <a class="bt rv-g" href="#O21" data-card="O21" data-viz="scatter">
+      <canvas class="bt-cv" aria-hidden="true"></canvas>
+      <div class="bt-tx">
+        <span class="bt-tag">최적화 · O21</span>
+        <h3>차익거래가격결정 모형</h3>
+        <b class="bt-kpi">시장 요인으로 수익률 설명</b>
+      </div>
+    </a>
+  </div>
+</section>
+
+<section id="cases">
+  <div class="sec-head"><h2>케이스 스터디</h2><span class="count">3편</span></div>
+
+  <article class="case rv-g">
+    <div class="case-tx">
+      <span class="case-eyebrow">케이스 스터디 01 · 최적화 O16</span>
+      <h3>상관 구조로 위험을 절반으로 — 최소분산 포트폴리오</h3>
+      <p>단일 자산의 변동성은 60.64%였습니다. 문제는 수익률을 크게 깎지 않으면서 이 위험을 얼마나 줄일 수 있는가였습니다.</p>
+      <p>자산 4종의 상관계수 행렬로 공분산을 구성해 포트폴리오 분산식을 세우고, 목표 수익률 6.93%를 하한 제약으로 건 채 분산을 최소화하는 비중을 해찾기로 도출했습니다.</p>
+      <p>결과는 변동성 <b>60.64% → 32.48%</b>. 수익률은 0.45%포인트만 내주고 위험을 46% 줄였습니다. 상관이 1보다 낮은 자산을 섞을 때 생기는 분산 효과가 수치로 그대로 확인됩니다.</p>
+      <a class="case-link" href="#O16" data-card="O16">모형 카드에서 직접 돌려보기 →</a>
+    </div>
+    <div class="case-kpis">
+      <div class="tile"><span>변동성</span><b>60.64% → 32.48%</b></div>
+      <div class="tile"><span>위험 감소율</span><b>-46.4%</b></div>
+      <div class="tile"><span>양보한 수익률</span><b>0.45%p</b></div>
+    </div>
+  </article>
+
+  <article class="case rev rv-g">
+    <div class="case-tx">
+      <span class="case-eyebrow">케이스 스터디 02 · 시뮬레이션 S12</span>
+      <h3>위기에는 자산이 함께 움직인다 — 촐레스키 VaR</h3>
+      <p>자산별 손실을 따로 구해 더하면 위험을 크게 과소평가합니다. 위기에는 상관이 함께 올라가기 때문입니다. 상관 구조를 어디에 심을 것인가가 문제였습니다.</p>
+      <p>과거 수익률에서 상관행렬을 구해 촐레스키 분해로 하삼각행렬을 만들고, 서로 독립인 표준정규 난수에 곱해 상관 구조를 갖는 난수로 변환했습니다. 그 난수로 자산 3종의 경로를 500회 생성해 손익 분포의 하위 분위에서 최대예상손실액을 읽습니다.</p>
+      <p>핵심은 손실을 <b>집계 단계가 아니라 난수 생성 단계</b>에서 상관과 함께 만든다는 점입니다. 분포 가정이 무너져도 절차가 그대로 성립합니다.</p>
+      <a class="case-link" href="#S12" data-card="S12">모형 카드에서 직접 돌려보기 →</a>
+    </div>
+    <div class="case-kpis">
+      <div class="tile"><span>난수 변환</span><b>무상관 Z → 상관 Z</b></div>
+      <div class="tile"><span>분해 방식</span><b>촐레스키 하삼각</b></div>
+      <div class="tile"><span>시행 횟수</span><b>500회</b></div>
+    </div>
+  </article>
+
+  <article class="case rv-g">
+    <div class="case-tx">
+      <span class="case-eyebrow">케이스 스터디 03 · 시뮬레이션 S20</span>
+      <h3>평균은 0, 흩어짐은 크다 — 델타헤지의 잔차 위험</h3>
+      <p>콜옵션 10만 계약을 판 쪽은 주가가 오르면 손실이 커집니다. 델타만큼 기초자산을 사서 상쇄하되, 조정을 주 1회로 제한하면 어떤 위험이 남는지가 질문이었습니다.</p>
+      <p>초기 델타 0.5031로 50,306주를 매입하고, 주가 경로를 생성해 매주 델타를 다시 계산하며 보유 주식을 조정했습니다. 재조정 비용과 차입 이자를 만기까지 누적해 헤지 손익을 집계합니다.</p>
+      <p>헤지 손익의 평균은 <b>1,359로 사실상 0</b>이지만 표준편차가 <b>418,275</b>, 최악의 경로는 <b>-2,252,910</b>입니다. 연속 조정이 아니라 주 단위 조정이라 남는 오차이며, 주기를 좁히면 줄지만 거래비용이 늡니다.</p>
+      <a class="case-link" href="#S20" data-card="S20">모형 카드에서 직접 돌려보기 →</a>
+    </div>
+    <div class="case-kpis">
+      <div class="tile"><span>헤지 손익 평균</span><b>1,359</b></div>
+      <div class="tile"><span>헤지 손익 표준편차</span><b>418,275</b></div>
+      <div class="tile"><span>최악의 경우</span><b>-2,252,910</b></div>
+    </div>
+  </article>
+</section>
 
 <div class="controls">
   <input id="q" type="search" placeholder="모형명, 기법, 수치로 검색 (예: VaR, 촐레스키, 델타, 결정계수)" autocomplete="off">
@@ -356,6 +533,53 @@ footer a:hover{border-bottom-color:var(--accent)}
 </section>
 
 <div class="empty hidden" id="empty">조건에 맞는 모형이 없습니다.</div>
+
+<nav class="seo-idx" aria-label="전체 모형 목록">
+<a href="#O01">O01 단순회귀 원가추정</a>
+<a href="#O02">O02 다중회귀 매출 예측</a>
+<a href="#O03">O03 멱함수 학습곡선 적합</a>
+<a href="#O04">O04 민감도분석과 목표값 탐색</a>
+<a href="#O05">O05 선형계획 인력배치</a>
+<a href="#O06">O06 GRG 비선형 해법</a>
+<a href="#O07">O07 유전 알고리즘 해법</a>
+<a href="#O08">O08 수송문제</a>
+<a href="#O09">O09 제품배합 최적화 1</a>
+<a href="#O10">O10 제품배합 최적화 2</a>
+<a href="#O11">O11 광고예산 배분</a>
+<a href="#O12">O12 디지털 광고 최적화</a>
+<a href="#O13">O13 생산계획</a>
+<a href="#O14">O14 물류원가 최소화</a>
+<a href="#O15">O15 복수 자본예산</a>
+<a href="#O16">O16 최소분산 포트폴리오</a>
+<a href="#O17">O17 손실확률 추정</a>
+<a href="#O18">O18 샤프지수 최대화</a>
+<a href="#O19">O19 수익률곡선 적합</a>
+<a href="#O20">O20 종이 재활용 배합</a>
+<a href="#O21">O21 차익거래가격결정 모형</a>
+<a href="#S01">S01 다항분포 재고 의사결정</a>
+<a href="#S02">S02 자동차 딜러 주문량 결정</a>
+<a href="#S03">S03 입찰 전략 시뮬레이션</a>
+<a href="#S04">S04 정규분포 재고 모형</a>
+<a href="#S05">S05 항공기 초과예약</a>
+<a href="#S06">S06 프로젝트 수익성 분석</a>
+<a href="#S07">S07 삼각분포 판매량 예측</a>
+<a href="#S08">S08 고객만족과 시장점유율</a>
+<a href="#S09">S09 경쟁업체 진입 현금흐름</a>
+<a href="#S10">S10 주가예측 기초모형</a>
+<a href="#S11">S11 주가예측모형 개발</a>
+<a href="#S12">S12 포트폴리오 최대예상손실액</a>
+<a href="#S13">S13 블랙숄즈 옵션가격</a>
+<a href="#S14">S14 옵션의 헤지 효과</a>
+<a href="#S15">S15 나비형 스프레드</a>
+<a href="#S16">S16 이색옵션</a>
+<a href="#S17">S17 환율선물</a>
+<a href="#S18">S18 상품선물 헤지</a>
+<a href="#S19">S19 환위험 옵션헤지</a>
+<a href="#S20">S20 델타헤지</a>
+<a href="#S21">S21 델타헤지 실데이터 적용</a>
+<a href="#S22">S22 블랙숄즈 실데이터 적용</a>
+<a href="#S23">S23 원화 환위험 옵션헤지</a>
+</nav>
 
 <footer>
   <div><strong>박지홍</strong> · 부산대학교 경영학과</div>
@@ -669,7 +893,7 @@ function build(item,i,prefix){
   sum.appendChild(tw);
 
   const body=el("div","body");
-  card._id=id;
+  card._id=id;card.id=id;
   card.addEventListener("toggle",()=>{
     if(card.open&&!card._built){
       card._built=true;
@@ -710,13 +934,28 @@ SIM.forEach((m,i)=>gSim.appendChild(build(m,i,"S")));
 
 const cards=[...document.querySelectorAll("details.card")];
 
-/* 스크롤 리빌 — 카드가 시야에 들어올 때 떠오른다 */
+/* 스크롤 리빌 — 카드·벤토·케이스가 시야에 들어올 때 떠오른다 */
 if(!REDUCED){
   const rv=new IntersectionObserver(es=>es.forEach(e=>{
     if(e.isIntersecting){e.target.classList.add("in");rv.unobserve(e.target);}
   }),{rootMargin:"0px 0px -30px"});
   cards.forEach(c=>{c.classList.add("rv");rv.observe(c);});
+  document.querySelectorAll(".rv-g").forEach(x=>rv.observe(x));
 }
+
+/* 벤토·케이스 → 해당 카드 열기 */
+function openCard(id){
+  const c=document.getElementById(id);if(!c)return;
+  c.open=true;
+  c.scrollIntoView({behavior:REDUCED?"auto":"smooth",block:"start"});
+}
+document.querySelectorAll("a[data-card]").forEach(a=>a.addEventListener("click",e=>{
+  e.preventDefault();
+  openCard(a.dataset.card);
+  history.replaceState(null,"","#"+a.dataset.card);
+}));
+if(location.hash.length>1&&/^#[OS]\d\d$/.test(location.hash))
+  setTimeout(()=>openCard(location.hash.slice(1)),80);
 
 const qEl=document.getElementById("q"), empty=document.getElementById("empty");
 let active="all";
@@ -753,6 +992,116 @@ tg.addEventListener("click",()=>{
   cards.forEach(c=>{if(!c.classList.contains("hidden")) c.open=open});
   tg.textContent=open?"전부 접기":"전부 펼치기";
 });
+
+/* ---------- 대표 모형 미니 라이브 캔버스 ---------- */
+(function(){
+  const tiles=[...document.querySelectorAll(".bt")];
+  if(!tiles.length)return;
+  const AA=(hex,a)=>{const r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);
+    return `rgba(${r},${g},${b},${a})`};
+  const items=tiles.map((tile,i)=>{
+    const cv=tile.querySelector(".bt-cv");
+    const rng=mulberry32(7+i*131);
+    const st={};
+    const viz=tile.dataset.viz;
+    if(viz==="paths"){const Z=[];for(let p=0;p<7;p++){const z=[0];for(let k=1;k<=50;k++)z.push(z[k-1]+normInv(rng()));Z.push(z);}st.Z=Z;}
+    if(viz==="scatter"){const pts=[];for(let k=0;k<18;k++)pts.push({x:.08+.84*rng(),e:normInv(rng())*.09});st.pts=pts;}
+    if(viz==="descent"){st.bx=-3.2;}
+    if(viz==="hist"){const bs=[];for(let k=0;k<9;k++)bs.push(Math.exp(-((k-5.6)**2)/4.2));st.bs=bs;}
+    return {tile,cv,viz,st,vis:false};
+  });
+  const io=new IntersectionObserver(es=>es.forEach(e=>{
+    const it=items.find(x=>x.tile===e.target);if(it)it.vis=e.isIntersecting;
+  }),{rootMargin:"60px"});
+  items.forEach(it=>io.observe(it.tile));
+
+  function draw(it,t){
+    const cv=it.cv,dpr=Math.min(devicePixelRatio||1,2);
+    const w=cv.clientWidth,h=cv.clientHeight;if(!w)return;
+    if(cv.width!==Math.round(w*dpr)){cv.width=w*dpr;cv.height=h*dpr;}
+    const x=cv.getContext("2d");
+    x.setTransform(dpr,0,0,dpr,0,0);x.clearRect(0,0,w,h);
+    const tk=TK();
+    const X=u=>w*(.08+.84*u),Y=v=>h*(.08+.6*(1-v));
+    x.lineWidth=2;x.lineJoin=x.lineCap="round";
+    if(it.viz==="frontier"){
+      x.strokeStyle=AA(tk.s1,.85);x.beginPath();
+      for(let k=0;k<=60;k++){const mu=.06+.84*k/60,s=Math.sqrt(.03+1.1*(mu-.42)**2);
+        const px=X((s-.17)/.95),py=Y(mu);k?x.lineTo(px,py):x.moveTo(px,py);}
+      x.stroke();
+      const mu=.45+.27*Math.sin(t*.5),s=Math.sqrt(.03+1.1*(mu-.42)**2);
+      const px=X((s-.17)/.95),py=Y(mu);
+      x.setLineDash([4,4]);x.strokeStyle=AA(tk.s3,.7);
+      x.beginPath();x.moveTo(X(0),Y(.14));x.lineTo(px,py);x.stroke();x.setLineDash([]);
+      x.fillStyle=tk.s2;x.beginPath();x.arc(px,py,4,0,7);x.fill();
+    }else if(it.viz==="tail"){
+      const pdf=u=>Math.exp(-(((u-.52)/.16)**2)/2);
+      x.fillStyle=AA(tk.s1,.1);x.beginPath();x.moveTo(X(0),Y(0));
+      for(let k=0;k<=60;k++)x.lineTo(X(k/60),Y(pdf(k/60)));
+      x.lineTo(X(1),Y(0));x.fill();
+      x.strokeStyle=AA(tk.s1,.85);x.beginPath();
+      for(let k=0;k<=60;k++){const u=k/60;k?x.lineTo(X(u),Y(pdf(u))):x.moveTo(X(u),Y(pdf(u)));}
+      x.stroke();
+      const q=.22;
+      x.fillStyle=AA(tk.red,.26+.13*Math.sin(t*2));
+      x.beginPath();x.moveTo(X(0),Y(0));
+      for(let k=0;k<=Math.round(60*q);k++)x.lineTo(X(k/60),Y(pdf(k/60)));
+      x.lineTo(X(q),Y(0));x.fill();
+      x.setLineDash([3,3]);x.strokeStyle=AA(tk.red,.8);
+      x.beginPath();x.moveTo(X(q),Y(0));x.lineTo(X(q),Y(.75));x.stroke();x.setLineDash([]);
+    }else if(it.viz==="descent"){
+      const m=.5+.5*Math.sin(t*.4);
+      const f=v=>{const a=.05*v**4-1.2*v**2+.3*v,b=.05*v**4-v**2-.6*v;return a+(b-a)*m};
+      let lo=1e9,hi=-1e9;const cur=[];
+      for(let k=0;k<=70;k++){const v=-4+8*k/70,yy=f(v);cur.push([v,yy]);if(yy<lo)lo=yy;if(yy>hi)hi=yy;}
+      x.strokeStyle=AA(tk.s1,.85);x.beginPath();
+      cur.forEach((p,k)=>{const px=X((p[0]+4)/8),py=Y((p[1]-lo)/(hi-lo));k?x.lineTo(px,py):x.moveTo(px,py);});
+      x.stroke();
+      const df=v=>(f(v+.01)-f(v-.01))/.02;
+      it.st.bx=Math.max(-3.9,Math.min(3.9,it.st.bx-.9*.016*df(it.st.bx)));
+      it.st.age=(it.st.age||0)+.016;
+      if(it.st.age>6){it.st.age=0;it.st.i=((it.st.i||0)+1)%4;it.st.bx=[-3.2,2.9,-1.1,3.5][it.st.i];}
+      x.fillStyle=tk.s2;x.beginPath();
+      x.arc(X((it.st.bx+4)/8),Y((f(it.st.bx)-lo)/(hi-lo)),4,0,7);x.fill();
+    }else if(it.viz==="hist"){
+      const n=it.st.bs.length;
+      it.st.bs.forEach((b,k)=>{
+        const v=b*(1+.12*Math.sin(t*1.3+k));
+        x.fillStyle=k===6?AA(tk.s2,.9):AA(tk.s1,.5);
+        x.fillRect(X(k/n+.015),Y(v),w*.84/n*.72,Y(0)-Y(v));
+      });
+    }else if(it.viz==="paths"){
+      const v=.2,mu=.06,ns=50,sd=v/Math.sqrt(ns);
+      const ph=(t%6)/6,head=Math.max(2,Math.floor(Math.min(1,ph*1.2)*ns));
+      it.st.Z.forEach((z,p)=>{
+        x.strokeStyle=p===2?AA(tk.s2,.95):AA(tk.s1,.4);
+        x.lineWidth=p===2?2:1.3;
+        x.beginPath();
+        for(let k=0;k<=head;k++){const s=Math.exp((mu-v*v/2)*k/ns+sd*z[k]);
+          const px=X(k/ns),py=Y(Math.max(0,Math.min(1,(s-.55)/1.1)));
+          k?x.lineTo(px,py):x.moveTo(px,py);}
+        x.stroke();
+      });
+      x.lineWidth=2;
+    }else{ /* scatter — 요인 회귀 */
+      x.strokeStyle=AA(tk.s2,.9);x.beginPath();x.moveTo(X(0),Y(.2));x.lineTo(X(1),Y(.86));x.stroke();
+      it.st.pts.forEach((p,k)=>{
+        const yy=.2+.66*p.x+p.e*(1+.15*Math.sin(t+k));
+        x.fillStyle=AA(tk.s1,.75);x.beginPath();
+        x.arc(X(p.x),Y(Math.max(.02,Math.min(.98,yy))),3,0,7);x.fill();
+      });
+    }
+  }
+  if(REDUCED){requestAnimationFrame(()=>items.forEach(it=>draw(it,1.4)));return;}
+  let t0=null;
+  function loop(ts){
+    if(t0===null)t0=ts;
+    const t=(ts-t0)/1000;
+    if(!document.hidden)items.forEach(it=>{if(it.vis)draw(it,t)});
+    requestAnimationFrame(loop);
+  }
+  requestAnimationFrame(loop);
+})();
 
 heroFX(document.getElementById("hero"));
 </script>

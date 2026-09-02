@@ -461,7 +461,7 @@ footer a:hover{border-bottom-color:var(--accent)}
       <span class="case-eyebrow">케이스 스터디 01 · 최적화 O16</span>
       <h3>상관 구조로 위험을 절반으로 — 최소분산 포트폴리오</h3>
       <p>단일 자산의 변동성은 60.64%였습니다. 문제는 수익률을 크게 깎지 않으면서 이 위험을 얼마나 줄일 수 있는가였습니다.</p>
-      <p>자산 4종의 상관계수 행렬로 공분산을 구성해 포트폴리오 분산식을 세우고, 목표 수익률 6.93%를 하한 제약으로 건 채 분산을 최소화하는 비중을 해찾기로 도출했습니다.</p>
+      <p>자산 4종의 상관계수 행렬로 공분산을 구성해 포트폴리오 분산식을 세우고, 목표 수익률 6.93%를 하한 제약으로 건 채 분산을 최소화하는 비중을 도출했습니다.</p>
       <p>결과는 변동성 <b>60.64% → 32.48%</b>. 수익률은 0.45%포인트만 내주고 위험을 46% 줄였습니다. 상관이 1보다 낮은 자산을 섞을 때 생기는 분산 효과가 수치로 그대로 확인됩니다.</p>
       <a class="case-link" href="#O16" data-card="O16">모형 카드에서 직접 돌려보기 →</a>
     </div>
@@ -1006,7 +1006,7 @@ tg.addEventListener("click",()=>{
     const viz=tile.dataset.viz;
     if(viz==="paths"){const Z=[];for(let p=0;p<7;p++){const z=[0];for(let k=1;k<=50;k++)z.push(z[k-1]+normInv(rng()));Z.push(z);}st.Z=Z;}
     if(viz==="scatter"){const pts=[];for(let k=0;k<18;k++)pts.push({x:.08+.84*rng(),e:normInv(rng())*.09});st.pts=pts;}
-    if(viz==="descent"){st.bx=-3.2;}
+    if(viz==="descent"){st.pop=Array.from({length:12},()=>({x:-4+8*rng()}));st.age=0;}
     if(viz==="hist"){const bs=[];for(let k=0;k<9;k++)bs.push(Math.exp(-((k-5.6)**2)/4.2));st.bs=bs;}
     return {tile,cv,viz,st,vis:false};
   });
@@ -1025,15 +1025,19 @@ tg.addEventListener("click",()=>{
     const X=u=>w*(.08+.84*u),Y=v=>h*(.08+.6*(1-v));
     x.lineWidth=2;x.lineJoin=x.lineCap="round";
     if(it.viz==="frontier"){
+      /* 최소분산: 프론티어 곡선 + 목표수익률 하한 위를 오가는 해,
+         꼭짓점(전역 최소분산)은 은은히 표시. 무위험자산·접선은 이 모형에 없음 */
       x.strokeStyle=AA(tk.s1,.85);x.beginPath();
       for(let k=0;k<=60;k++){const mu=.06+.84*k/60,s=Math.sqrt(.03+1.1*(mu-.42)**2);
         const px=X((s-.17)/.95),py=Y(mu);k?x.lineTo(px,py):x.moveTo(px,py);}
       x.stroke();
-      const mu=.45+.27*Math.sin(t*.5),s=Math.sqrt(.03+1.1*(mu-.42)**2);
-      const px=X((s-.17)/.95),py=Y(mu);
-      x.setLineDash([4,4]);x.strokeStyle=AA(tk.s3,.7);
-      x.beginPath();x.moveTo(X(0),Y(.14));x.lineTo(px,py);x.stroke();x.setLineDash([]);
-      x.fillStyle=tk.s2;x.beginPath();x.arc(px,py,4,0,7);x.fill();
+      const vx=X((Math.sqrt(.03)-.17)/.95),vy=Y(.42);
+      x.strokeStyle=AA(tk.s3,.55+.25*Math.sin(t*2));x.lineWidth=1.5;
+      x.beginPath();x.arc(vx,vy,6,0,7);x.stroke();x.lineWidth=2;
+      const mu=.45+.25*Math.sin(t*.5),s=Math.sqrt(.03+1.1*(mu-.42)**2);
+      x.setLineDash([3,3]);x.strokeStyle=AA(tk.grid,.9);
+      x.beginPath();x.moveTo(X(0),Y(mu));x.lineTo(X(1),Y(mu));x.stroke();x.setLineDash([]);
+      x.fillStyle=tk.s2;x.beginPath();x.arc(X((s-.17)/.95),Y(mu),4,0,7);x.fill();
     }else if(it.viz==="tail"){
       const pdf=u=>Math.exp(-(((u-.52)/.16)**2)/2);
       x.fillStyle=AA(tk.s1,.1);x.beginPath();x.moveTo(X(0),Y(0));
@@ -1050,19 +1054,26 @@ tg.addEventListener("click",()=>{
       x.setLineDash([3,3]);x.strokeStyle=AA(tk.red,.8);
       x.beginPath();x.moveTo(X(q),Y(0));x.lineTo(X(q),Y(.75));x.stroke();x.setLineDash([]);
     }else if(it.viz==="descent"){
-      const m=.5+.5*Math.sin(t*.4);
+      /* 유전 알고리즘: 모집단이 지형 위에 흩어졌다가 세대를 거치며
+         전역 최솟값으로 수렴 — 단일 해 경사하강(GRG)과 구분 */
+      const m=.5+.5*Math.sin(t*.25);
       const f=v=>{const a=.05*v**4-1.2*v**2+.3*v,b=.05*v**4-v**2-.6*v;return a+(b-a)*m};
       let lo=1e9,hi=-1e9;const cur=[];
       for(let k=0;k<=70;k++){const v=-4+8*k/70,yy=f(v);cur.push([v,yy]);if(yy<lo)lo=yy;if(yy>hi)hi=yy;}
       x.strokeStyle=AA(tk.s1,.85);x.beginPath();
       cur.forEach((p,k)=>{const px=X((p[0]+4)/8),py=Y((p[1]-lo)/(hi-lo));k?x.lineTo(px,py):x.moveTo(px,py);});
       x.stroke();
-      const df=v=>(f(v+.01)-f(v-.01))/.02;
-      it.st.bx=Math.max(-3.9,Math.min(3.9,it.st.bx-.9*.016*df(it.st.bx)));
-      it.st.age=(it.st.age||0)+.016;
-      if(it.st.age>6){it.st.age=0;it.st.i=((it.st.i||0)+1)%4;it.st.bx=[-3.2,2.9,-1.1,3.5][it.st.i];}
-      x.fillStyle=tk.s2;x.beginPath();
-      x.arc(X((it.st.bx+4)/8),Y((f(it.st.bx)-lo)/(hi-lo)),4,0,7);x.fill();
+      let gm=cur[0];cur.forEach(p=>{if(p[1]<gm[1])gm=p;});
+      it.st.age+=.016;
+      if(it.st.age>5.5){it.st.age=0;it.st.pop.forEach(p=>p.x=-4+8*Math.random());}
+      const prog=Math.min(1,it.st.age/4);
+      it.st.pop.forEach((p,k)=>{
+        p.x+=(gm[0]-p.x)*.012+Math.sin(t*3+k*2.1)*.02*(1-prog);
+        x.fillStyle=AA(tk.s2,.45+.5*prog);x.beginPath();
+        x.arc(X((p.x+4)/8),Y((f(p.x)-lo)/(hi-lo)),2.6,0,7);x.fill();
+      });
+      x.strokeStyle=AA(tk.s3,.6+.3*Math.sin(t*2));x.lineWidth=1.5;
+      x.beginPath();x.arc(X((gm[0]+4)/8),Y((gm[1]-lo)/(hi-lo)),6,0,7);x.stroke();x.lineWidth=2;
     }else if(it.viz==="hist"){
       const n=it.st.bs.length;
       it.st.bs.forEach((b,k)=>{

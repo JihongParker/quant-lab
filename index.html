@@ -235,10 +235,46 @@ table.kv td:last-child{text-align:right;font-variant-numeric:tabular-nums;font-w
 .case-kpis .tile b{font-size:17px}
 @media (max-width:720px){.case{grid-template-columns:1fr;padding:22px}.case.rev .case-tx{order:0}}
 
-/* 공통 스크롤 리빌 */
-.rv-g{opacity:0;transform:translateY(18px);
-  transition:opacity .7s var(--ease-out),transform .7s var(--ease-out)}
-.rv-g.in{opacity:1;transform:none}
+/* ---------- 스크롤 시네마 ---------- */
+#story{height:150vh;position:relative}
+.story-pin{position:sticky;top:0;height:100vh;overflow:hidden}
+#storyCv{position:absolute;inset:0;width:100%;height:100%}
+.story-tag{position:absolute;top:15%;transform:translateX(-50%);font-weight:800;font-size:15px;
+  color:var(--text);background:var(--panel);border:1px solid var(--line);border-radius:999px;
+  padding:6px 16px;opacity:0;box-shadow:var(--shadow-raised);transition:opacity .3s;white-space:nowrap}
+.story-tag.o{left:30%}.story-tag.s{left:70%}
+.story-cap{position:absolute;left:0;right:0;bottom:13%;text-align:center;color:var(--muted)}
+.story-cap b{display:block;font-size:clamp(20px,3.4vw,30px);color:var(--text);
+  letter-spacing:-.02em;font-weight:800;margin-bottom:4px}
+.story-cap span{font-size:var(--fs-label)}
+@media (prefers-reduced-motion:reduce){#story{display:none}}
+
+/* ---------- 스크롤 구동 연출 (지원 브라우저 한정, JS 0) ---------- */
+@supports (animation-timeline: view()){
+  @media (prefers-reduced-motion: no-preference){
+    header .wrap-inner{animation:heroSink linear both;animation-timeline:scroll();animation-range:0 90vh}
+    #hero{animation:heroDrift linear both;animation-timeline:scroll();animation-range:0 90vh}
+    .case-kpis .tile{animation:kpiSlide linear both;animation-timeline:view();
+      animation-range:entry 0% entry 100%}
+    .sec-head::before{animation:barGrow linear both;animation-timeline:view();
+      animation-range:entry 0% entry 100%;transform-origin:bottom}
+  }
+}
+@keyframes heroSink{to{transform:translateY(70px);opacity:0}}
+@keyframes heroDrift{to{transform:translateY(12%)}}
+@keyframes kpiSlide{from{opacity:0;transform:translateX(26px)}}
+@keyframes barGrow{from{transform:scaleY(.2);opacity:.4}}
+
+/* ---------- 장면 전환 (View Transitions) ---------- */
+::view-transition-group(vtCard){animation-duration:.55s;animation-timing-function:cubic-bezier(.22,1,.36,1)}
+@media (prefers-reduced-motion:reduce){
+  ::view-transition-group(*),::view-transition-old(*),::view-transition-new(*){animation:none!important}
+}
+
+/* 공통 스크롤 리빌 — .in 이후에는 transform을 남기지 않아 호버 틸트와 충돌하지 않는다 */
+.rv-g{transition:opacity .7s var(--ease-out),transform .7s var(--ease-out)}
+.rv-g:not(.in){opacity:0;transform:translateY(18px)}
+.rv-g.in{opacity:1}
 .bt.rv-g{transition:transform .55s var(--ease-out),box-shadow var(--dur-m) var(--ease-out),
   border-color var(--dur-m) var(--ease-out),opacity .7s var(--ease-out)}
 @media (prefers-reduced-motion:reduce){.rv-g{opacity:1;transform:none;transition:none}}
@@ -396,6 +432,15 @@ footer a:hover{border-bottom-color:var(--accent)}
     </div>
   </div>
 </header>
+
+<section id="story" aria-hidden="true">
+  <div class="story-pin">
+    <canvas id="storyCv"></canvas>
+    <span class="story-tag o">최적화 21</span>
+    <span class="story-tag s">시뮬레이션 23</span>
+    <div class="story-cap"><b>엑셀과 VBA로 구현한 44개 모형</b><span>스크롤을 내리면 두 갈래로 갈라집니다</span></div>
+  </div>
+</section>
 
 <section id="featured">
   <div class="sec-head"><h2>대표 모형</h2><span class="count">6선</span></div>
@@ -951,9 +996,32 @@ function openCard(id){
 }
 document.querySelectorAll("a[data-card]").forEach(a=>a.addEventListener("click",e=>{
   e.preventDefault();
-  openCard(a.dataset.card);
-  history.replaceState(null,"","#"+a.dataset.card);
+  const id=a.dataset.card, card=document.getElementById(id);
+  history.replaceState(null,"","#"+id);
+  /* 지원 시 타일이 카드로 옮겨 앉는 장면 전환 */
+  if(document.startViewTransition&&!REDUCED&&card&&!card.open){
+    /* 구 상태에서는 타일이, 새 상태에서는 카드가 같은 이름을 가져야 모핑된다 */
+    a.style.viewTransitionName="vtCard";
+    const vt=document.startViewTransition(()=>{
+      a.style.viewTransitionName="";
+      card.style.viewTransitionName="vtCard";
+      card.open=true;
+      card.scrollIntoView({block:"start"});
+    });
+    vt.finished.finally(()=>{a.style.viewTransitionName="";card.style.viewTransitionName="";});
+  }else openCard(id);
 }));
+
+/* 벤토 타일 커서 틸트 */
+if(!REDUCED)document.querySelectorAll(".bt").forEach(tile=>{
+  tile.addEventListener("pointermove",e=>{
+    const r=tile.getBoundingClientRect();
+    const rx=((e.clientY-r.top)/r.height-.5)*-7, ry=((e.clientX-r.left)/r.width-.5)*7;
+    tile.style.transition="transform .12s ease-out";
+    tile.style.transform=`perspective(700px) translateY(-3px) rotateX(${rx.toFixed(2)}deg) rotateY(${ry.toFixed(2)}deg)`;
+  });
+  tile.addEventListener("pointerleave",()=>{tile.style.transition="";tile.style.transform="";});
+});
 if(location.hash.length>1&&/^#[OS]\d\d$/.test(location.hash))
   setTimeout(()=>openCard(location.hash.slice(1)),80);
 
@@ -1115,6 +1183,7 @@ tg.addEventListener("click",()=>{
 })();
 
 heroFX(document.getElementById("hero"));
+storyFX(document.getElementById("story"));
 </script>
 </body>
 </html>

@@ -188,7 +188,11 @@ function histo(cv, data, o = {}) {
   if (!data.length) return;
   const bins = o.bins ?? 30;
   let lo = o.lo ?? Math.min(...data), hi = o.hi ?? Math.max(...data);
-  if (lo === hi) { lo -= 1; hi += 1; }
+  /* 부동소수 잔차 수준의 범위는 퇴화로 취급 — 동일값이 여러 빈으로
+     쪼개지고 눈금이 전부 같은 값으로 찍히는 것을 막는다 */
+  if (hi - lo < Math.max(Math.abs(hi), Math.abs(lo), 1) * 1e-6) {
+    const m = (lo + hi) / 2; lo = m - 1; hi = m + 1;
+  }
   const cnt = new Array(bins).fill(0);
   data.forEach((v) => { let i = Math.floor((v - lo) / (hi - lo) * bins); i = Math.max(0, Math.min(bins - 1, i)); cnt[i]++; });
   const ymax = Math.max(...cnt) * 1.08;
@@ -573,13 +577,14 @@ ENGINES.O07 = (host) => {
 /* ---- O08 수송문제 ---- */
 ENGINES.O08 = (host) => {
   const d = EDATA.O08;
-  const cv = mkCanvas(host, 270);
+  const cv = mkCanvas(host, 290);
   const sup = ["A", "B", "C", "D", "E"], cus = ["1", "2", "3", "4"];
   const total = d.ship.flat().reduce((s, v, i) => s + v * d.cost.flat()[i], 0);
   function draw() {
     const f = frame(cv, { x0: 0, x1: 1, y0: 0, y1: 1, xTicks: 0, yTicks: 0, padL: 8, padR: 8, padB: 8, padT: 8 });
     const c = f.ctx;
-    const sy = (i) => f.padT + 20 + i * (f.H - 40) / 4;
+    /* 마지막 노드의 하단 라벨(+26px)이 캔버스 안에 들어오도록 여백 확보 */
+    const sy = (i) => f.padT + 24 + i * (f.H - 64) / 4;
     const cy = (j) => f.padT + 30 + j * (f.H - 60) / 3;
     const sx = f.padL + 60, cx2 = f.padL + f.W - 60;
     d.ship.forEach((row, i) => row.forEach((q, j) => {
@@ -923,24 +928,29 @@ ENGINES.O18 = (host) => {
 /* ---- O19 수익률곡선 ---- */
 ENGINES.O19 = (host) => {
   const d = EDATA.O19;
-  const fwd = d.t.map((t, i) => {
+  /* 원자료 배열 끝의 null 패딩을 걷어낸다 — 그대로 그리면 (0,0)으로
+     좌표화되어 화면 밖으로 선이 뻗는다 */
+  const T = [], S = [];
+  d.t.forEach((t, i) => { if (t != null && d.spot[i] != null) { T.push(t); S.push(d.spot[i]); } });
+  const fwd = T.map((t, i) => {
     if (i === 0) return null;
-    return Math.pow(Math.pow(1 + d.spot[i], t) / Math.pow(1 + d.spot[i - 1], d.t[i - 1]), 1 / (t - d.t[i - 1])) - 1;
+    return Math.pow(Math.pow(1 + S[i], t) / Math.pow(1 + S[i - 1], T[i - 1]), 1 / (t - T[i - 1])) - 1;
   });
+  const x0 = T[0], x1 = T[T.length - 1];
   const cv = mkCanvas(host, 240);
   function draw() {
-    const f = frame(cv, { x0: 1, x1: 9, y0: 0.038, y1: 0.056, xfmt: (v) => v + "년", yfmt: (v) => F.pct(v, 1), xlab: "만기" });
-    line(f, d.t.map((t, i) => [t, d.spot[i]]), f.t.s1, 2);
-    dots(f, d.t.map((t, i) => [t, d.spot[i]]), f.t.s1, 4);
-    const fp = d.t.map((t, i) => fwd[i] ? [t, fwd[i]] : null).filter(Boolean);
+    const f = frame(cv, { x0, x1, y0: 0.038, y1: 0.056, xfmt: (v) => v + "년", yfmt: (v) => F.pct(v, 1), xlab: "만기" });
+    line(f, T.map((t, i) => [t, S[i]]), f.t.s1, 2);
+    dots(f, T.map((t, i) => [t, S[i]]), f.t.s1, 4);
+    const fp = T.map((t, i) => fwd[i] ? [t, fwd[i]] : null).filter(Boolean);
     line(f, fp, f.t.s2, 2, [6, 4]);
     dots(f, fp, f.t.s2, 4);
     cv.onmousemove = (ev) => {
       const r = cv.getBoundingClientRect();
-      const x = 1 + (ev.clientX - r.left - f.padL) / f.W * 8;
-      const i = Math.max(0, Math.min(8, Math.round(x) - 1));
+      const x = x0 + (ev.clientX - r.left - f.padL) / f.W * (x1 - x0);
+      const i = Math.max(0, Math.min(T.length - 1, Math.round(x) - 1));
       showTip(ev.clientX, ev.clientY,
-        `만기 ${d.t[i]}년<br>현물 <b>${F.pct(d.spot[i], 2)}</b>` + (fwd[i] ? `<br>선도 <b>${F.pct(fwd[i], 2)}</b>` : ""));
+        `만기 ${T[i]}년<br>현물 <b>${F.pct(S[i], 2)}</b>` + (fwd[i] ? `<br>선도 <b>${F.pct(fwd[i], 2)}</b>` : ""));
     };
     cv.onmouseleave = hideTip;
   }
@@ -1698,8 +1708,13 @@ ENGINES.S18 = (host) => {
       const cost = qty * ST - hr * qty * (ST - F0); /* 만기 선물가 = 현물가로 수렴 */
       acc.push(cost / 1000); return cost;
     }, () => {
+      /* 헤지 100%면 분포가 한 점에 수렴해 축 범위가 좁아진다 —
+         범위에 맞춰 소수 자릿수를 올려 눈금이 같은 값으로 보이지 않게 */
+      let lo = acc[0], hi2 = acc[0];
+      acc.forEach(v => { if (v < lo) lo = v; if (v > hi2) hi2 = v; });
+      const dd = hi2 - lo < 0.5 ? 2 : hi2 - lo < 5 ? 1 : 0;
       histo(cv, acc, {
-        bins: 36, xfmt: (v) => F.n(v) + "천$",
+        bins: 36, xfmt: (v) => F.n(v, dd) + "천$",
         color: TK().s1,
         marks: [{ x: qty * F0 / 1000, label: "선물가 고정 시", color: TK().ink }],
       });

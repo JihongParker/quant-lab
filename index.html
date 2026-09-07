@@ -479,6 +479,37 @@ footer a:hover{border-bottom-color:var(--accent)}
   </div>
 </section>
 
+
+
+<div class="controls">
+  <input id="q" type="search" placeholder="모형명, 기법, 수치로 검색 (예: VaR, 촐레스키, 델타, 결정계수)" autocomplete="off">
+  <div class="filters" id="filters">
+    <button class="chip" aria-pressed="true" data-f="all">전체</button>
+    <button class="chip" aria-pressed="false" data-f="회귀">회귀분석</button>
+    <button class="chip" aria-pressed="false" data-f="선형계획">선형계획</button>
+    <button class="chip" aria-pressed="false" data-f="비선형">비선형·진화</button>
+    <button class="chip" aria-pressed="false" data-f="포트폴리오">포트폴리오</button>
+    <button class="chip" aria-pressed="false" data-f="위험">위험측정</button>
+    <button class="chip" aria-pressed="false" data-f="파생">파생상품</button>
+    <button class="chip" aria-pressed="false" data-f="분포">확률분포</button>
+    <button class="chip" aria-pressed="false" data-f="실데이터">실데이터</button>
+    <span class="spacer"></span>
+    <button class="chip ghost" id="toggleAll">전부 펼치기</button>
+  </div>
+</div>
+
+<section id="opt">
+  <div class="sec-head"><h2>1. 최적화</h2><span class="count">21종</span></div>
+  <div class="grid" id="grid-opt"></div>
+</section>
+
+<section id="sim">
+  <div class="sec-head"><h2>2. 시뮬레이션</h2><span class="count">23종</span></div>
+  <div class="grid" id="grid-sim"></div>
+</section>
+
+<div class="empty hidden" id="empty">조건에 맞는 모형이 없습니다.</div>
+
 <section id="cases">
   <div class="sec-head"><h2>케이스 스터디</h2><span class="count">3편</span></div>
 
@@ -533,35 +564,6 @@ footer a:hover{border-bottom-color:var(--accent)}
     </div>
   </article>
 </section>
-
-<div class="controls">
-  <input id="q" type="search" placeholder="모형명, 기법, 수치로 검색 (예: VaR, 촐레스키, 델타, 결정계수)" autocomplete="off">
-  <div class="filters" id="filters">
-    <button class="chip" aria-pressed="true" data-f="all">전체</button>
-    <button class="chip" aria-pressed="false" data-f="회귀">회귀분석</button>
-    <button class="chip" aria-pressed="false" data-f="선형계획">선형계획</button>
-    <button class="chip" aria-pressed="false" data-f="비선형">비선형·진화</button>
-    <button class="chip" aria-pressed="false" data-f="포트폴리오">포트폴리오</button>
-    <button class="chip" aria-pressed="false" data-f="위험">위험측정</button>
-    <button class="chip" aria-pressed="false" data-f="파생">파생상품</button>
-    <button class="chip" aria-pressed="false" data-f="분포">확률분포</button>
-    <button class="chip" aria-pressed="false" data-f="실데이터">실데이터</button>
-    <span class="spacer"></span>
-    <button class="chip ghost" id="toggleAll">전부 펼치기</button>
-  </div>
-</div>
-
-<section id="opt">
-  <div class="sec-head"><h2>1. 최적화</h2><span class="count">21종</span></div>
-  <div class="grid" id="grid-opt"></div>
-</section>
-
-<section id="sim">
-  <div class="sec-head"><h2>2. 시뮬레이션</h2><span class="count">23종</span></div>
-  <div class="grid" id="grid-sim"></div>
-</section>
-
-<div class="empty hidden" id="empty">조건에 맞는 모형이 없습니다.</div>
 
 <nav class="seo-idx" aria-label="전체 모형 목록">
 <a href="#O01">O01 단순회귀 원가추정</a>
